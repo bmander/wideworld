@@ -26,7 +26,7 @@ class NearbyHandler(tornado.web.RequestHandler):
 
         self.write( {'id':node_id,'lat':node_lat,'lon':node_lon,'dist':node_dist} )
 
-class NearbyHandler(tornado.web.RequestHandler):
+class PathHandler(tornado.web.RequestHandler):
     def get(self):
 	lat1 = float( self.get_argument("lat1") )
         lon1 = float( self.get_argument("lon1") )
@@ -63,6 +63,8 @@ class NearbyHandler(tornado.web.RequestHandler):
 application = tornado.web.Application([
     (r"/bounds", BoundsHandler),
     (r"/nearby", NearbyHandler),
+    (r"/path", PathHandler),
+    (r"/(.*)", tornado.web.StaticFileHandler, {"path":"./static"}) 
 ])
 
 if __name__ == "__main__":
