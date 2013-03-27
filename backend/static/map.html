@@ -5,8 +5,37 @@
          <link rel="stylesheet" href="leaflet/leaflet.ie.css" />
      <![endif]-->
      <script src="leaflet/leaflet.js"></script>
+     <script src="js/jquery.js"></script>
      <script type="text/javascript">
        var map;
+       var orig_marker;
+       var dest_marker;
+       
+       var polylines=[];
+
+       function delete_old_route(){
+         for(var i=0; i<polylines.length; i++){
+            map.removeLayer( polylines[i] );
+         }
+         polylines = [];
+       }
+
+       function init_get_route(){
+         delete_old_route();
+
+	 var orig_pt = orig_marker.getLatLng();
+         var dest_pt = dest_marker.getLatLng();
+
+         $.getJSON("/path?lat1="+orig_pt.lat+"&lon1="+orig_pt.lng+"&lat2="+dest_pt.lat+"&lon2="+dest_pt.lng, function(data){
+           for(var i=0; i<data.geom.length; i++){
+             var seg = [];
+             for(var j=0; j<data.geom[i].length; j++){
+               seg.push( new L.LatLng( data.geom[i][j][1], data.geom[i][j][0] ) );
+             }
+             polylines.push( L.polyline(seg).addTo(map) );
+           }
+         });
+       }
 
        function initialize(){
          map = L.map('map').setView([42.359928,-71.060249], 13);
@@ -14,8 +43,11 @@
            attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>',
            maxZoom: 18
          }).addTo(map);
-         L.marker([42.361577,-71.088316],{'draggable':true}).addTo(map);
-         L.marker([42.382439,-71.115009],{'draggable':true}).addTo(map);
+         orig_marker = L.marker([42.361577,-71.088316],{'draggable':true}).addTo(map);
+         dest_marker = L.marker([42.382439,-71.115009],{'draggable':true}).addTo(map);
+
+         orig_marker.on('dragend', init_get_route);
+         dest_marker.on('dragend', init_get_route);
        }
      </script>
   </head>
