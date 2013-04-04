@@ -30,9 +30,11 @@
             </intent-filter>
         </activity>
         
+        <meta-data android:name="CLOUDMADE_KEY" android:value="a1a6db9fe0a44b5bbc1a74d695d21900" />
+        
     </application>
     
-    <meta-data android:name="CLOUDMADE_KEY" android:value="a1a6db9fe0a44b5bbc1a74d695d21900" />
+    
 
 
 </manifest>
