@@ -1,4 +1,5 @@
 *.swp
 *.cache
 .DS_Store
-frontend/WideWorld/bin/dexedLibs
+frontend/WideWorld/bin
+
