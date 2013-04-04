@@ -1,4 +1,6 @@
-package com.example.wideworld;
+package edu.mit.media.wideworld;
+
+import com.example.wideworld.R;
 
 import android.os.Bundle;
 import android.app.Activity;
