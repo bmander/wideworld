@@ -5,13 +5,30 @@ import com.example.wideworld.R;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
+import android.widget.RelativeLayout;
+import android.widget.RelativeLayout.LayoutParams;
+
+import org.osmdroid.views.MapView;
+import org.osmdroid.tileprovider.util.CloudmadeUtil;
 
 public class MainActivity extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
+		
+		
+		//CloudmadeUtil.retrieveCloudmadeKey(getApplicationContext());
+		
+		final RelativeLayout rl = new RelativeLayout(this);
+		MapView mv = new MapView(this, 256);
+		mv.setMultiTouchControls(true);
+		mv.setBuiltInZoomControls(true);
+		rl.addView(mv, new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT,
+                LayoutParams.MATCH_PARENT));
+		
+		setContentView(rl);
+		//setContentView(R.layout.activity_main);
 	}
 
 	@Override
