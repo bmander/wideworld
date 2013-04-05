@@ -4,6 +4,7 @@ import edu.mit.media.wideworld.R;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.util.Log;
 import android.view.Menu;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
@@ -15,16 +16,17 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-				
-		final RelativeLayout rl = new RelativeLayout(this);
+		setContentView(R.layout.activity_main);
+		
+		RelativeLayout rl = (RelativeLayout) findViewById(R.id.root);
+		
+		// set up map
 		MapView mv = new MapView(this, 256);
 		mv.setMultiTouchControls(true);
 		mv.setBuiltInZoomControls(true);
 		rl.addView(mv, new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT));
 		
-		setContentView(rl);
-		//setContentView(R.layout.activity_main);
 	}
 
 	@Override
