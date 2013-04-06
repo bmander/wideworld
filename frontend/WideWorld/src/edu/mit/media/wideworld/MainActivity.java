@@ -23,6 +23,7 @@ import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.MotionEventCompat;
 import android.util.Log;
@@ -39,15 +40,22 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.osmdroid.api.IGeoPoint;
+import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Overlay;
+import org.osmdroid.views.overlay.PathOverlay;
 
 @TargetApi(Build.VERSION_CODES.GINGERBREAD)
 public class MainActivity extends Activity{
 	
 	IGeoPoint orig;
 	IGeoPoint dest;
+	MapView mv;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +69,7 @@ public class MainActivity extends Activity{
 		RelativeLayout rl = (RelativeLayout) findViewById(R.id.root);
 		
 		// set up map
-		MapView mv = new MapView(this, 256);
+		mv = new MapView(this, 256);
 		mv.setMultiTouchControls(true);
 		mv.setBuiltInZoomControls(true);
 		rl.addView(mv, new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT,
@@ -84,27 +92,71 @@ public class MainActivity extends Activity{
 			return;
 		}
 		
+		// get the orig and dest points
+		double lat1 = orig.getLatitudeE6()/1E6;
+		double lng1 = orig.getLongitudeE6()/1E6;
+		double lat2 = dest.getLatitudeE6()/1E6;
+		double lng2 = dest.getLongitudeE6()/1E6;
+		
 		Log.v("DEBUG", "orig:"+orig+" dest:"+dest);
 		
-		HttpClient hc = new DefaultHttpClient();
-		HttpResponse response;
+		// there's a lot that can go wrong here...
 		try {
-			double lat1 = orig.getLatitudeE6()/1E6;
-			double lng1 = orig.getLongitudeE6()/1E6;
-			double lat2 = dest.getLatitudeE6()/1E6;
-			double lng2 = dest.getLongitudeE6()/1E6;
+
+			// create http client
+			HttpClient hc = new DefaultHttpClient();
+			HttpResponse response;
 			
+			// create uri for terminus points
 			URI uri = new URI("http://wideworld.media.mit.edu/path?lat1="+lat1+"&lon1="+lng1+"&lat2="+lat2+"&lon2="+lng2);
 			Log.v("DEBUG",uri.toString());
+			
+			// grab response
 			response = hc.execute( new HttpGet( uri ));
-			 StatusLine statusLine = response.getStatusLine();
+			StatusLine statusLine = response.getStatusLine();
+			
+			// if the response is OK
 		    if(statusLine.getStatusCode() == HttpStatus.SC_OK){
+		    	// piece together the response string
 		        ByteArrayOutputStream out = new ByteArrayOutputStream();
 		        response.getEntity().writeTo(out);
 		        out.close();
 		        String responseString = out.toString();
 		        Log.v("DEBUG", Integer.toString(responseString.length()));
-		        //..more logic
+		        
+		        // convert the response string into a map overlay
+		        try {
+		        	// the entire message
+					JSONObject object = (JSONObject) new JSONTokener(responseString).nextValue();
+					String id1 = object.getString("id1");
+					String id2 = object.getString("id2");
+					
+					// get list of linestrings
+					JSONArray geoms = object.getJSONArray("geom");
+					
+					// for each linestring
+					for(int i=0; i<geoms.length(); i++){
+						// create path overlay
+						PathOverlay pathoverlay = new PathOverlay(Color.RED,this);
+						
+						// populate path overlay
+						JSONArray geom = geoms.getJSONArray(i);
+						for(int j=0; j<geom.length(); j++){
+							JSONArray pt = geom.getJSONArray(j);
+							double lng = pt.getDouble(0);
+							double lat = pt.getDouble(1);
+							pathoverlay.addPoint(new GeoPoint(lat,lng));
+						}
+						
+						// add path overlay to map
+						mv.getOverlays().add(pathoverlay);
+					}
+					
+					Log.v("DEBUG", "id1:"+id1+" id2:"+id2);
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 		    } else{
 		        //Closes the connection.
 		        response.getEntity().getContent().close();
