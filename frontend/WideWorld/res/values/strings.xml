@@ -3,5 +3,7 @@
 
     <string name="app_name">WideWorld</string>
     <string name="action_settings">Settings</string>
-
+    <string name="dialog_fire_missiles">Fire Missiles?</string>
+    <string name="fire">Fire!</string>
+    <string name="cancel">I am le tired</string>
 </resources>
