@@ -45,6 +45,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.osmdroid.api.IGeoPoint;
+import org.osmdroid.mapsforge.wrapper.MapController;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Overlay;
@@ -70,7 +71,9 @@ public class MainActivity extends Activity{
 		
 		// set up map
 		mv = new MapView(this, 256);
-		mv.setMultiTouchControls(true);
+		org.osmdroid.views.MapController mc = mv.getController();
+		mc.setZoom(13);
+		mc.setCenter(new GeoPoint(42.360346,-71.088105));
 		mv.setBuiltInZoomControls(true);
 		rl.addView(mv, new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT));
@@ -194,6 +197,7 @@ public class MainActivity extends Activity{
 		
         public boolean onLongPress(final MotionEvent e, final MapView mapView) {
         	final IGeoPoint pt = mapView.getProjection().fromPixels(e.getX(), e.getY());
+        	Log.v("DEBUG", "poke ("+e.getX()+","+e.getY()+"), projected to ("+pt.getLatitudeE6()+","+pt.getLongitudeE6()+")");
         	
         	// build alert dialog
         	AlertDialog.Builder builder = new AlertDialog.Builder(context);
