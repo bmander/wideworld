@@ -38,8 +38,11 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.util.DisplayMetrics;
@@ -174,96 +177,125 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 		
 		Log.v("DEBUG", "orig:"+orig+" dest:"+dest);
 		
-		// there's a lot that can go wrong here...
-		try {
+		String url = "http://wideworld.media.mit.edu/path?lat1="+lat1+"&lon1="+lng1+"&lat2="+lat2+"&lon2="+lng2;
+		FetchRouteTask rt = new FetchRouteTask();
+		rt.setContext(context);
+		rt.execute(url);
+	}
+	
+	Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            mMapView.invalidate();
+        }
+	};
+	
+	private class FetchRouteTask extends AsyncTask<String, Void, Void> {
+		
+		private Context context;
 
-			// create http client
-			HttpClient hc = new DefaultHttpClient();
-			HttpResponse response;
+		@Override
+		protected Void doInBackground(String... url) {
 			
-			// create uri for terminus points
-			URI uri = new URI("http://wideworld.media.mit.edu/path?lat1="+lat1+"&lon1="+lng1+"&lat2="+lat2+"&lon2="+lng2);
-			Log.v("DEBUG",uri.toString());
-			
-			// grab response
-			response = hc.execute( new HttpGet( uri ));
-			StatusLine statusLine = response.getStatusLine();
-			
-			// if the response is OK
-		    if(statusLine.getStatusCode() == HttpStatus.SC_OK){
-		    	// piece together the response string
-		        ByteArrayOutputStream out = new ByteArrayOutputStream();
-		        response.getEntity().writeTo(out);
-		        out.close();
-		        String responseString = out.toString();
-		        Log.v("DEBUG", Integer.toString(responseString.length()));
-		        
-		        // convert the response string into a map overlay
-		        try {
-		        	// the entire message
-					JSONObject object = (JSONObject) new JSONTokener(responseString).nextValue();
-					String id1 = object.getString("id1");
-					String id2 = object.getString("id2");
-					
-					// remove all the old paths from the map
-					if(mPathOverlays != null){
-						List<Overlay> allOverlays = mMapView.getOverlays();
-						for(int i=0; i<mPathOverlays.size(); i++){
-							allOverlays.remove(mPathOverlays.get(i));
+			// there's a lot that can go wrong here...
+			try {
+
+				// create http client
+				HttpClient hc = new DefaultHttpClient();
+				HttpResponse response;
+				
+				// create uri for terminus points
+				URI uri = new URI(url[0]);
+				Log.v("DEBUG",uri.toString());
+				
+				// grab response
+				response = hc.execute( new HttpGet( uri ));
+				StatusLine statusLine = response.getStatusLine();
+				
+				// if the response is OK
+			    if(statusLine.getStatusCode() == HttpStatus.SC_OK){
+			    	// piece together the response string
+			        ByteArrayOutputStream out = new ByteArrayOutputStream();
+			        response.getEntity().writeTo(out);
+			        out.close();
+			        String responseString = out.toString();
+			        Log.v("DEBUG", Integer.toString(responseString.length()));
+			        
+			        // convert the response string into a map overlay
+			        try {
+			        	// the entire message
+						JSONObject object = (JSONObject) new JSONTokener(responseString).nextValue();
+						String id1 = object.getString("id1");
+						String id2 = object.getString("id2");
+						
+						// remove all the old paths from the map
+						if(mPathOverlays != null){
+							List<Overlay> allOverlays = mMapView.getOverlays();
+							for(int i=0; i<mPathOverlays.size(); i++){
+								allOverlays.remove(mPathOverlays.get(i));
+							}
 						}
+						// prepare the path list to accept new paths
+						mPathOverlays = new ArrayList<PathOverlay>();
+						
+						// get list of linestrings
+						JSONArray geoms = object.getJSONArray("geom");
+						
+						// for each linestring
+						for(int i=0; i<geoms.length(); i++){
+							// create path overlay
+							PathOverlay pathoverlay = new PathOverlay(Color.BLUE,context);
+							pathoverlay.getPaint().setStrokeWidth(5.0f);
+
+							// populate path overlay
+							JSONArray geom = geoms.getJSONArray(i);
+							for(int j=0; j<geom.length(); j++){
+								JSONArray pt = geom.getJSONArray(j);
+								double lng = pt.getDouble(0);
+								double lat = pt.getDouble(1);
+								pathoverlay.addPoint(new GeoPoint(lat,lng));
+							}	
+
+							// add path overlay to map
+							mMapView.getOverlays().add(pathoverlay);
+							mPathOverlays.add(pathoverlay);
+
+						}
+						//mMapView.invalidate();
+						mHandler.sendMessage(new Message());
+						
+						
+						Log.v("DEBUG", "id1:"+id1+" id2:"+id2);
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
-					// prepare the path list to accept new paths
-					mPathOverlays = new ArrayList<PathOverlay>();
-					
-					// get list of linestrings
-					JSONArray geoms = object.getJSONArray("geom");
-					
-					// for each linestring
-					for(int i=0; i<geoms.length(); i++){
-						// create path overlay
-						PathOverlay pathoverlay = new PathOverlay(Color.BLUE,context);
-						pathoverlay.getPaint().setStrokeWidth(5.0f);
+			    } else{
+			        //Closes the connection.
+			        response.getEntity().getContent().close();
+			        throw new IOException(statusLine.getReasonPhrase());
+			    }
+				//Log.v("DEBUG", "resp:"+response);
+			} catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
-						// populate path overlay
-						JSONArray geom = geoms.getJSONArray(i);
-						for(int j=0; j<geom.length(); j++){
-							JSONArray pt = geom.getJSONArray(j);
-							double lng = pt.getDouble(0);
-							double lat = pt.getDouble(1);
-							pathoverlay.addPoint(new GeoPoint(lat,lng));
-						}	
-
-						// add path overlay to map
-						mMapView.getOverlays().add(pathoverlay);
-						mPathOverlays.add(pathoverlay);
-
-					}
-					mMapView.invalidate();
-					
-					
-					Log.v("DEBUG", "id1:"+id1+" id2:"+id2);
-				} catch (JSONException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-		    } else{
-		        //Closes the connection.
-		        response.getEntity().getContent().close();
-		        throw new IOException(statusLine.getReasonPhrase());
-		    }
-			//Log.v("DEBUG", "resp:"+response);
-		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	 catch (URISyntaxException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			return null;
 		}
 
- catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		public void setContext(Context context) {
+			this.context = context;
 		}
+		
 	}
 
 	public class GestureOverlay extends Overlay {

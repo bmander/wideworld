@@ -19,10 +19,6 @@ public class MainActivity extends FragmentActivity
         super.onCreate(savedInstanceState);
 
         this.setContentView(R.layout.activity_main);
-        
-		/* TODO: REMOVE AS SOON AS POSSIBLE */
-		ThreadPolicy tp = ThreadPolicy.LAX;
-		StrictMode.setThreadPolicy(tp);
 
         // FrameLayout mapContainer = (FrameLayout) findViewById(R.id.map_container);
         // RelativeLayout parentContainer = (RelativeLayout) findViewById(R.id.parent_container);
