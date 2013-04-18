@@ -5,6 +5,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -22,6 +24,7 @@ import org.osmdroid.tileprovider.tilesource.ITileSource;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.DirectedLocationOverlay;
 import org.osmdroid.views.overlay.MinimapOverlay;
 import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.PathOverlay;
@@ -64,7 +67,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
     private MapView mMapView;
     private MinimapOverlay mMinimapOverlay;
     private ResourceProxy mResourceProxy;
-    private PathOverlay mPathOverlay;
+    private List<PathOverlay> mPathOverlays;
     
 	private GeoPoint orig;
 	private GeoPoint dest;
@@ -114,6 +117,9 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         
         Overlay overlay = new GestureOverlay(context);
 		mMapView.getOverlays().add(overlay);
+		
+		Overlay locOverlay = new DirectedLocationOverlay(context);
+		mMapView.getOverlays().add(locOverlay);
 
         mMapView.getController().setZoom(mPrefs.getInt(PREFS_ZOOM_LEVEL, 1));
         mMapView.scrollTo(mPrefs.getInt(PREFS_SCROLL_X, 0), mPrefs.getInt(PREFS_SCROLL_Y, 0));
@@ -199,14 +205,25 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 					String id1 = object.getString("id1");
 					String id2 = object.getString("id2");
 					
+					// remove all the old paths from the map
+					if(mPathOverlays != null){
+						List<Overlay> allOverlays = mMapView.getOverlays();
+						for(int i=0; i<mPathOverlays.size(); i++){
+							allOverlays.remove(mPathOverlays.get(i));
+						}
+					}
+					// prepare the path list to accept new paths
+					mPathOverlays = new ArrayList<PathOverlay>();
+					
 					// get list of linestrings
 					JSONArray geoms = object.getJSONArray("geom");
 					
 					// for each linestring
 					for(int i=0; i<geoms.length(); i++){
 						// create path overlay
-						PathOverlay pathoverlay = new PathOverlay(Color.RED,context);
-						
+						PathOverlay pathoverlay = new PathOverlay(Color.BLUE,context);
+						pathoverlay.getPaint().setStrokeWidth(5.0f);
+
 						// populate path overlay
 						JSONArray geom = geoms.getJSONArray(i);
 						for(int j=0; j<geom.length(); j++){
@@ -214,11 +231,15 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 							double lng = pt.getDouble(0);
 							double lat = pt.getDouble(1);
 							pathoverlay.addPoint(new GeoPoint(lat,lng));
-						}
-						
+						}	
+
 						// add path overlay to map
 						mMapView.getOverlays().add(pathoverlay);
+						mPathOverlays.add(pathoverlay);
+
 					}
+					mMapView.invalidate();
+					
 					
 					Log.v("DEBUG", "id1:"+id1+" id2:"+id2);
 				} catch (JSONException e) {
