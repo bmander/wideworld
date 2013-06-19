@@ -177,7 +177,8 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 		
 		Log.v("DEBUG", "orig:"+orig+" dest:"+dest);
 		
-		String url = "http://wideworld.media.mit.edu/path?lat1="+lat1+"&lon1="+lng1+"&lat2="+lat2+"&lon2="+lng2;
+		//String url = "http://wideworld.media.mit.edu/path?lat1="+lat1+"&lon1="+lng1+"&lat2="+lat2+"&lon2="+lng2;
+		String url = "http://wideworld.media.mit.edu/bos/plan?lat1="+lat1+"&lon1="+lng1+"&lat2="+lat2+"&lon2="+lng2+"&bspeed=3.1&transit=t";
 		FetchRouteTask rt = new FetchRouteTask();
 		rt.setContext(context);
 		rt.execute(url);
@@ -225,8 +226,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 			        try {
 			        	// the entire message
 						JSONObject object = (JSONObject) new JSONTokener(responseString).nextValue();
-						String id1 = object.getString("id1");
-						String id2 = object.getString("id2");
+						
 						
 						// remove all the old paths from the map
 						if(mPathOverlays != null){
@@ -238,21 +238,31 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 						// prepare the path list to accept new paths
 						mPathOverlays = new ArrayList<PathOverlay>();
 						
-						// get list of linestrings
-						JSONArray geoms = object.getJSONArray("geom");
+						// get list of legs
+						JSONArray plan = object.getJSONArray("plan");
 						
-						// for each linestring
-						for(int i=0; i<geoms.length(); i++){
+						// for each leg
+						for(int i=0; i<plan.length(); i++){
+							JSONObject leg = plan.getJSONObject(i);
+							int pathColor = Color.GRAY;
+							if( leg.getString("type").equals("transit") ) {
+								pathColor = Color.RED;
+							} else if (leg.getString("type").equals("walk") && leg.getString("mode").equals("walk")){
+								pathColor = Color.BLUE;
+							} else if (leg.getString("type").equals("walk") && leg.getString("mode").equals("bikeshare")){
+							    pathColor = Color.GREEN;
+							}
+							
 							// create path overlay
-							PathOverlay pathoverlay = new PathOverlay(Color.BLUE,context);
+							PathOverlay pathoverlay = new PathOverlay(pathColor,context);
 							pathoverlay.getPaint().setStrokeWidth(5.0f);
 
 							// populate path overlay
-							JSONArray geom = geoms.getJSONArray(i);
-							for(int j=0; j<geom.length(); j++){
-								JSONArray pt = geom.getJSONArray(j);
-								double lng = pt.getDouble(0);
-								double lat = pt.getDouble(1);
+							JSONArray leg_locs = leg.getJSONArray("locs");
+							for(int j=0; j<leg_locs.length(); j++){
+								JSONObject loc = leg_locs.getJSONObject(j);
+								double lng = loc.getDouble("lon");
+								double lat = loc.getDouble("lat");
 								pathoverlay.addPoint(new GeoPoint(lat,lng));
 							}	
 
@@ -264,8 +274,6 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 						//mMapView.invalidate();
 						mHandler.sendMessage(new Message());
 						
-						
-						Log.v("DEBUG", "id1:"+id1+" id2:"+id2);
 					} catch (JSONException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
