@@ -25,7 +25,6 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.DirectedLocationOverlay;
-import org.osmdroid.views.overlay.MinimapOverlay;
 import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.PathOverlay;
 
@@ -45,7 +44,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.util.DisplayMetrics;
+//import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -67,8 +66,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
     // ===========================================================
 
     private SharedPreferences mPrefs;
-    private MapView mMapView;
-    private MinimapOverlay mMinimapOverlay;
+    private static MapView mMapView;
     private ResourceProxy mResourceProxy;
     private List<PathOverlay> mPathOverlays;
     
@@ -105,18 +103,13 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         super.onActivityCreated(savedInstanceState);
 
         final Context context = this.getActivity();
-		final DisplayMetrics dm = context.getResources().getDisplayMetrics();
+		//final DisplayMetrics dm = context.getResources().getDisplayMetrics();
         // mResourceProxy = new ResourceProxyImpl(getActivity().getApplicationContext());
 
         mPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 
-        mMinimapOverlay = new MinimapOverlay(getActivity(), mMapView.getTileRequestCompleteHandler());
-		mMinimapOverlay.setWidth(dm.widthPixels / 5);
-		mMinimapOverlay.setHeight(dm.heightPixels / 5);
-
         mMapView.setBuiltInZoomControls(true);
         mMapView.setMultiTouchControls(true);
-        mMapView.getOverlays().add(this.mMinimapOverlay);
         
         Overlay overlay = new GestureOverlay(context);
 		mMapView.getOverlays().add(overlay);
@@ -184,7 +177,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 		rt.execute(url);
 	}
 	
-	Handler mHandler = new Handler() {
+	static Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             mMapView.invalidate();
