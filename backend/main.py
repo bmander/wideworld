@@ -19,7 +19,7 @@ class BoundsHandler(tornado.web.RequestHandler):
 
 class NearbyHandler(tornado.web.RequestHandler):
     def get(self):
-	lat = float(self.get_argument("lat"))
+        lat = float(self.get_argument("lat"))
         lon = float(self.get_argument("lon"))
 
         node_id,node_lat,node_lon,node_dist = osmdb.nearest_node(lat,lon)
@@ -28,9 +28,9 @@ class NearbyHandler(tornado.web.RequestHandler):
 
 class PathHandler(tornado.web.RequestHandler):
     def get(self):
-	lat1 = float( self.get_argument("lat1") )
+        lat1 = float( self.get_argument("lat1") )
         lon1 = float( self.get_argument("lon1") )
-	lat2 = float( self.get_argument("lat2") )
+        lat2 = float( self.get_argument("lat2") )
         lon2 = float( self.get_argument("lon2") )
 
         osm_node_id1,node_lat,node_lon,node_dist = osmdb.nearest_node(lat1,lon1)
@@ -41,7 +41,7 @@ class PathHandler(tornado.web.RequestHandler):
             return
         if osm_node_id2 is None:
             self.write( {'error':'destination lookup error'} )
-            return	
+            return  
 
         node_id1 = "osm-"+osm_node_id1
         node_id2 = "osm-"+osm_node_id2
