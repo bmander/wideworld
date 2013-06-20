@@ -52,6 +52,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 /**
  * Default map view activity.
@@ -176,17 +177,22 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 		Log.v("DEBUG", "orig:"+orig+" dest:"+dest);
 		
 		//String url = "http://wideworld.media.mit.edu/path?lat1="+lat1+"&lon1="+lng1+"&lat2="+lat2+"&lon2="+lng2;
-		String url = "http://wideworld.media.mit.edu/bos/plan?lat1="+lat1+"&lon1="+lng1+"&lat2="+lat2+"&lon2="+lng2+"&bspeed=3.1&transit=t";
+		String url = "http://wideworld.media.mit.edu/bos/plan?lat1="+lat1+"&lon1="+lng1+"&lat2="+lat2+"&lon2="+lng2+"&bspeed=4.5&transit=t";
 		FetchRouteTask rt = new FetchRouteTask();
 		rt.setContext(context);
 		rt.execute(url);
 	}
 	
-	static Handler mHandler = new Handler() {
+	static Handler mHandler = new Handler() {		
         @Override
         public void handleMessage(Message msg) {
+        	
+			Toast toast = Toast.makeText((Context)msg.obj, "total time: "+(msg.arg2-msg.arg1)/60+"m", Toast.LENGTH_SHORT);
+			toast.show();
+			
             mMapView.invalidate();
         }
+
 	};
 	
 	private class FetchRouteTask extends AsyncTask<String, Void, Void> {
@@ -218,7 +224,6 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 			        response.getEntity().writeTo(out);
 			        out.close();
 			        String responseString = out.toString();
-			        Log.v("DEBUG", Integer.toString(responseString.length()));
 			        
 			        // convert the response string into a map overlay
 			        try {
@@ -238,6 +243,23 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 						
 						// get list of legs
 						JSONArray plan = object.getJSONArray("plan");
+						
+						// figure out trip time from first and last leg
+						JSONObject firstLeg = plan.getJSONObject(0);
+						JSONObject lastLeg = plan.getJSONObject(plan.length()-1);
+						
+						JSONArray firstLegLocs = firstLeg.getJSONArray("locs");
+						JSONArray lastLegLocs = lastLeg.getJSONArray("locs");
+						
+						JSONObject firstLoc = firstLegLocs.getJSONObject(0);
+						JSONObject lastLoc = lastLegLocs.getJSONObject(lastLegLocs.length()-1);
+						
+						int firstLocTime = firstLoc.getInt("time");
+						int lastLocTime = lastLoc.getInt("time");
+						
+						Log.v("DEBUG", "total time: "+(lastLocTime-firstLocTime)+"s" );
+						
+
 						
 						// for each leg
 						for(int i=0; i<plan.length(); i++){
@@ -270,7 +292,11 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 
 						}
 						//mMapView.invalidate();
-						mHandler.sendMessage(new Message());
+						Message msg = new Message();
+						msg.arg1 = firstLocTime;
+						msg.arg2 = lastLocTime;
+						msg.obj = context;
+						mHandler.sendMessage(msg);
 						
 					} catch (JSONException e) {
 						// TODO Auto-generated catch block
