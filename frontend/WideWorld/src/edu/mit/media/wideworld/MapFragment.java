@@ -44,8 +44,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
+import android.app.Fragment;
+import android.app.FragmentManager;
 //import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -61,6 +61,7 @@ import android.widget.Toast;
  * @author Manuel Stahl
  * 
  */
+@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class MapFragment extends Fragment implements OpenStreetMapConstants
 {
 
@@ -85,10 +86,19 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
+    	Log.v("DEBUG", "CREATE VIEW; mPathOverlays already has "+mPathOverlays+" items");
         mResourceProxy = new ResourceProxyImpl(inflater.getContext().getApplicationContext());
         mMapView = new MapView(inflater.getContext(), 256, mResourceProxy);
         mMapView.setUseSafeCanvas(true);
         setHardwareAccelerationOff();
+        
+        if(mPathOverlays != null){
+        	for(int i=0; i<mPathOverlays.size(); i++){
+        		PathOverlay po = mPathOverlays.get(i);
+        		mMapView.getOverlays().add(po);
+        	}
+        }
+        
         return mMapView;
     }
 

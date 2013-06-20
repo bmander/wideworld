@@ -4,6 +4,8 @@ import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
 import android.app.ActionBar.TabListener;
+import android.app.Activity;
+import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,7 +14,7 @@ import android.os.StrictMode.ThreadPolicy;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 
-@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
 public class MainActivity extends FragmentActivity
 {
 
@@ -30,6 +32,7 @@ public class MainActivity extends FragmentActivity
         
         Tab mapTab = actionBar.newTab();
         mapTab.setText("map");
+        final Activity superthis = this;
         mapTab.setTabListener( new TabListener(){
 
 			@Override
@@ -39,19 +42,25 @@ public class MainActivity extends FragmentActivity
 			}
 
 			@Override
-			public void onTabSelected(Tab arg0, FragmentTransaction arg1) {
-				// TODO Auto-generated method stub
+			public void onTabSelected(Tab arg0, FragmentTransaction ft) {
+				Fragment mapFragment = superthis.getFragmentManager().findFragmentByTag("map");
+				
+				if( mapFragment == null ){
+					mapFragment = new MapFragment();
+					ft.add( R.id.map_container, mapFragment, "map" );
+				} else {
+					ft.attach(mapFragment);
+				}
 				
 			}
 
 			@Override
-			public void onTabUnselected(Tab arg0, FragmentTransaction arg1) {
-				// TODO Auto-generated method stub
-				
+			public void onTabUnselected(Tab arg0, FragmentTransaction ft) {
+				Fragment mapFragment = superthis.getFragmentManager().findFragmentByTag("map");
+				ft.detach( mapFragment );				
 			}
         	
         });
-        actionBar.addTab(mapTab);
         
         Tab navTab = actionBar.newTab();
         navTab.setText("nav");
@@ -64,29 +73,29 @@ public class MainActivity extends FragmentActivity
 			}
 
 			@Override
-			public void onTabSelected(Tab arg0, FragmentTransaction arg1) {
-				// TODO Auto-generated method stub
+			public void onTabSelected(Tab arg0, FragmentTransaction ft) {
+				Fragment navFragment = superthis.getFragmentManager().findFragmentByTag("nav");
 				
+				if( navFragment == null ){
+					navFragment = new ControlFragment();
+					ft.add( R.id.map_container, navFragment, "nav" );
+				} else {
+					ft.attach(navFragment);
+				}
 			}
 
 			@Override
-			public void onTabUnselected(Tab arg0, FragmentTransaction arg1) {
-				// TODO Auto-generated method stub
-				
+			public void onTabUnselected(Tab arg0, FragmentTransaction ft) {
+				Fragment navFragment = superthis.getFragmentManager().findFragmentByTag("nav");
+				ft.detach( navFragment );	
 			}
         	
         });
+        
         actionBar.addTab(navTab);
+        actionBar.addTab(mapTab);
 
         this.setContentView(R.layout.activity_main);
-
-        // FrameLayout mapContainer = (FrameLayout) findViewById(R.id.map_container);
-        // RelativeLayout parentContainer = (RelativeLayout) findViewById(R.id.parent_container);
-        FragmentManager fm = this.getSupportFragmentManager();
-
-        MapFragment mapFragment = new MapFragment();
-
-        fm.beginTransaction().add(R.id.map_container, mapFragment).commit();
     }
     
 
