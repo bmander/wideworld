@@ -25,8 +25,10 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.DirectedLocationOverlay;
+import org.osmdroid.views.overlay.MyLocationOverlay;
 import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.PathOverlay;
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 
 import edu.mit.media.wideworld.constants.OpenStreetMapConstants;
 
@@ -114,8 +116,11 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         Overlay overlay = new GestureOverlay(context);
 		mMapView.getOverlays().add(overlay);
 		
-		Overlay locOverlay = new DirectedLocationOverlay(context);
+		MyLocationOverlay locOverlay = new MyLocationOverlay(context, mMapView);	
 		mMapView.getOverlays().add(locOverlay);
+		locOverlay.enableMyLocation();
+		
+		Log.v("DEBUG", locOverlay.toString() );
 
         mMapView.getController().setZoom(mPrefs.getInt(PREFS_ZOOM_LEVEL, 1));
         mMapView.scrollTo(mPrefs.getInt(PREFS_SCROLL_X, 0), mPrefs.getInt(PREFS_SCROLL_Y, 0));
