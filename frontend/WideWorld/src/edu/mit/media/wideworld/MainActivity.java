@@ -1,5 +1,7 @@
 package edu.mit.media.wideworld;
 
+import org.osmdroid.util.GeoPoint;
+
 import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
@@ -25,6 +27,8 @@ public class MainActivity extends FragmentActivity
 {
 	
 	boolean useTransit;
+	GeoPoint orig;
+	GeoPoint dest;
 
     // ===========================================================
     // Constructors

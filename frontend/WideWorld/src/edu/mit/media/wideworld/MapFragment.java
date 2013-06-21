@@ -74,8 +74,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
     private ResourceProxy mResourceProxy;
     private List<PathOverlay> mPathOverlays;
     
-	private GeoPoint orig;
-	private GeoPoint dest;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -172,9 +171,9 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 	}
 	
 	private void findAndDisplayRoute() {
-		final Context context = this.getActivity();
+		final MainActivity context = (MainActivity)this.getActivity();
 		
-	    boolean useTransit = ((MainActivity)context).useTransit;
+	    boolean useTransit = context.useTransit;
 	    
 	    String use_transit_string;
 	    if(useTransit){
@@ -183,17 +182,17 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 	    	use_transit_string="f";
 	    }
 		
-		if( orig==null || dest==null ){
+		if( context.orig==null || context.dest==null ){
 			return;
 		}
 		
 		// get the orig and dest points
-		double lat1 = orig.getLatitudeE6()/1E6;
-		double lng1 = orig.getLongitudeE6()/1E6;
-		double lat2 = dest.getLatitudeE6()/1E6;
-		double lng2 = dest.getLongitudeE6()/1E6;
+		double lat1 = context.orig.getLatitudeE6()/1E6;
+		double lng1 = context.orig.getLongitudeE6()/1E6;
+		double lat2 = context.dest.getLatitudeE6()/1E6;
+		double lng2 = context.dest.getLongitudeE6()/1E6;
 		
-		Log.v("DEBUG", "orig:"+orig+" dest:"+dest);
+		Log.v("DEBUG", "orig:"+context.orig+" dest:"+context.dest);
 		
 		String url = "http://wideworld.media.mit.edu/bos/plan?lat1="+lat1+"&lon1="+lng1+"&lat2="+lat2+"&lon2="+lng2+"&bspeed=4.5&transit="+use_transit_string;
 		FetchRouteTask rt = new FetchRouteTask();
@@ -364,6 +363,8 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 		}
 		
         public boolean onLongPress(final MotionEvent e, final MapView mapView) {
+        	final MainActivity top = (MainActivity)getActivity();
+        	
         	final GeoPoint pt = (GeoPoint) mapView.getProjection().fromPixels(e.getX(), e.getY());
         	Log.v("DEBUG", "poke ("+e.getX()+","+e.getY()+"), projected to ("+pt.getLatitudeE6()+","+pt.getLongitudeE6()+")");
         	
@@ -371,13 +372,13 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         	AlertDialog.Builder builder = new AlertDialog.Builder(context);
         	builder.setPositiveButton("Destination", new DialogInterface.OnClickListener(){
         		public void onClick(DialogInterface dialog, int id){
-        			dest = pt;
+        			top.dest = pt;
         			findAndDisplayRoute();
         		}
         	});
         	builder.setNegativeButton("Origin", new DialogInterface.OnClickListener(){
         		public void onClick(DialogInterface dialog, int id){
-        			orig = pt;
+        			top.orig = pt;
         			findAndDisplayRoute();
         		}
         	});
