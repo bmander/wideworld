@@ -3,9 +3,39 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
-    <TextView
-       android:layout_width="match_parent"
-       android:layout_height="wrap_content"
-       android:text="It's Fragment C" />
+
+    <EditText
+        android:id="@+id/orig_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="@string/orig_hint"
+        android:inputType="text" >
+        <requestFocus />
+    </EditText>
+    <EditText
+        android:id="@+id/dest_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="@string/dest_hint"
+        android:inputType="text" >
+        <requestFocus />
+    </EditText>
+    <CheckBox android:id="@+id/checkbox_usetransit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/checkbox_usetransit"
+        android:onClick="onCheckboxClicked"/>
+    <Spinner
+    	android:id="@+id/speed_spinner"
+    	android:layout_width="fill_parent"
+    	android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/go_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/go_text" />
 
 </LinearLayout>

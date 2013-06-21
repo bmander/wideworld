@@ -85,7 +85,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
-    {
+    {    	
     	Log.v("DEBUG", "CREATE VIEW; mPathOverlays already has "+mPathOverlays+" items");
         mResourceProxy = new ResourceProxyImpl(inflater.getContext().getApplicationContext());
         mMapView = new MapView(inflater.getContext(), 256, mResourceProxy);
@@ -174,6 +174,15 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 	private void findAndDisplayRoute() {
 		final Context context = this.getActivity();
 		
+	    boolean useTransit = ((MainActivity)context).useTransit;
+	    
+	    String use_transit_string;
+	    if(useTransit){
+	    	use_transit_string="t";
+	    } else {
+	    	use_transit_string="f";
+	    }
+		
 		if( orig==null || dest==null ){
 			return;
 		}
@@ -186,8 +195,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 		
 		Log.v("DEBUG", "orig:"+orig+" dest:"+dest);
 		
-		//String url = "http://wideworld.media.mit.edu/path?lat1="+lat1+"&lon1="+lng1+"&lat2="+lat2+"&lon2="+lng2;
-		String url = "http://wideworld.media.mit.edu/bos/plan?lat1="+lat1+"&lon1="+lng1+"&lat2="+lat2+"&lon2="+lng2+"&bspeed=4.5&transit=t";
+		String url = "http://wideworld.media.mit.edu/bos/plan?lat1="+lat1+"&lon1="+lng1+"&lat2="+lat2+"&lon2="+lng2+"&bspeed=4.5&transit="+use_transit_string;
 		FetchRouteTask rt = new FetchRouteTask();
 		rt.setContext(context);
 		rt.execute(url);

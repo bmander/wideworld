@@ -3,4 +3,13 @@
 
     <string name="app_name">WideWorld</string>
     <string name="action_settings">Settings</string>
+    <string name="orig_hint">Origin Address</string>
+    <string name="dest_hint">Destination Address</string>
+    <string name="checkbox_usetransit">Use Transit</string>
+    <string-array name="speeds_array">
+        <item>Slower</item>
+        <item>Average</item>
+        <item>Faster</item>
+    </string-array>
+    <string name="go_text">Go!</string>
 </resources>

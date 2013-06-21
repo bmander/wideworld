@@ -7,16 +7,24 @@ import android.app.ActionBar.TabListener;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.os.StrictMode.ThreadPolicy;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
+import android.view.View;
+import android.widget.CheckBox;
 
 @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
 public class MainActivity extends FragmentActivity
 {
+	
+	boolean useTransit;
 
     // ===========================================================
     // Constructors
@@ -47,7 +55,7 @@ public class MainActivity extends FragmentActivity
 				
 				if( mapFragment == null ){
 					mapFragment = new MapFragment();
-					ft.add( R.id.map_container, mapFragment, "map" );
+					ft.add( android.R.id.content, mapFragment, "map" );
 				} else {
 					ft.attach(mapFragment);
 				}
@@ -76,9 +84,9 @@ public class MainActivity extends FragmentActivity
 			public void onTabSelected(Tab arg0, FragmentTransaction ft) {
 				Fragment navFragment = superthis.getFragmentManager().findFragmentByTag("nav");
 				
-				if( navFragment == null ){
+				if( navFragment == null ) {
 					navFragment = new ControlFragment();
-					ft.add( R.id.map_container, navFragment, "nav" );
+					ft.add( android.R.id.content, navFragment, "nav" );
 				} else {
 					ft.attach(navFragment);
 				}
@@ -94,10 +102,13 @@ public class MainActivity extends FragmentActivity
         
         actionBar.addTab(navTab);
         actionBar.addTab(mapTab);
-
-        this.setContentView(R.layout.activity_main);
     }
     
+	public void onCheckboxClicked(View view) {
+	    // Is the view now checked?
+	    this.useTransit = ((CheckBox) view).isChecked();
+	    	    
+	}
 
     
 }
