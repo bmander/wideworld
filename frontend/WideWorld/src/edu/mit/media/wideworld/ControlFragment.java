@@ -3,6 +3,8 @@ package edu.mit.media.wideworld;
 import java.io.IOException;
 import java.util.List;
 
+import org.osmdroid.util.GeoPoint;
+
 import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.location.Address;
@@ -42,34 +44,49 @@ public class ControlFragment extends Fragment {
         final Button button = (Button) fragView.findViewById(R.id.go_button);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-            	//MainActivity getActivity();
+            	MainActivity top = (MainActivity)getActivity();
             	
             	Geocoder geocoder = new Geocoder(v.getContext());
             	
             	/* if there's an address in the origin box, use it as start point */
             	EditText orig_text_field = (EditText)fragView.findViewById(R.id.orig_text);
             	String orig_text = orig_text_field.getText().toString();
-            	
             	if( orig_text.length() > 0 ){
 	            	try {
 	            		//TODO use non-hardcoded bounding box
 						List<Address> addresses = geocoder.getFromLocationName(orig_text, 1, 42.184267, -71.249771, 42.449301, 70.888595);
-						
-//						if( addresses.size() > 0 ){
-//							
-//						}
-						
-						for(int i=0; i<addresses.size(); i++){
-							Address addy = addresses.get(i);
-							Log.v("DEBUG", addy.toString());
+												
+						if( addresses.size() > 0 ){
+							Address addy = addresses.get(0);
+							top.orig = new GeoPoint(addy.getLatitude(), addy.getLongitude());							
 						}
+						
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
             	}
             	
-            	Log.v("DEBUG", "orig text: "+orig_text.getText() );
+            	/* if there's an address in the dest box, use it as end point */
+            	EditText dest_text_field = (EditText)fragView.findViewById(R.id.dest_text);
+            	String dest_text = dest_text_field.getText().toString();
+            	if( dest_text.length() > 0 ){
+	            	try {
+	            		//TODO use non-hardcoded bounding box
+						List<Address> addresses = geocoder.getFromLocationName(dest_text, 1, 42.184267, -71.249771, 42.449301, 70.888595);
+												
+						if( addresses.size() > 0 ){
+							Address addy = addresses.get(0);
+							top.dest = new GeoPoint(addy.getLatitude(), addy.getLongitude());							
+						}
+						
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+            	}
+            	
+            	//Log.v("DEBUG", "orig text: "+orig_text.getText() );
             	
                 Log.v("DEBUG", "CLICK YO");
             }
