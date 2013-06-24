@@ -24,11 +24,9 @@ import org.osmdroid.tileprovider.tilesource.ITileSource;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
-import org.osmdroid.views.overlay.DirectedLocationOverlay;
 import org.osmdroid.views.overlay.MyLocationOverlay;
 import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.PathOverlay;
-import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 
 import edu.mit.media.wideworld.constants.OpenStreetMapConstants;
 
@@ -45,7 +43,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.app.Fragment;
-import android.app.FragmentManager;
 //import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -163,12 +160,6 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         } catch (final IllegalArgumentException ignore) {
         }
     }
-
-	protected void startSampleFragment(Fragment fragment) {
-		FragmentManager fm = getFragmentManager();
-		fm.beginTransaction().hide(this).add(android.R.id.content, fragment, "SampleFragment")
-				.addToBackStack(null).commit();
-	}
 	
 	private void findAndDisplayRoute() {
 		final MainActivity context = (MainActivity)this.getActivity();
