@@ -57,16 +57,11 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
     private static MapView mMapView;
     private ResourceProxy mResourceProxy;
     private List<PathOverlay> mPathOverlays;
-    
-    RouteServer routeServer;
-    
-
 
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        routeServer = new RouteServer("wideworld.media.mit.edu", "bos");
     }
 
     @Override
@@ -166,7 +161,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 		double lat2 = context.dest.getLatitudeE6()/1E6;
 		double lng2 = context.dest.getLongitudeE6()/1E6;
 				
-		routeServer.getRoute(routeServer.new Request(lat1, lng1, lat2, lng2, useTransit, 4.5), new RouteServer.FetchRouteCallback(){
+		context.routeServer.getRoute(context.routeServer.new Request(lat1, lng1, lat2, lng2, useTransit, 4.5), new RouteServer.FetchRouteCallback(){
 			public void onResponse(RouteServer.Response resp){
 				// remove all the old paths from the map
 				if(mPathOverlays != null){

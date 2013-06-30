@@ -25,6 +25,7 @@ import android.widget.CheckBox;
 @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
 public class MainActivity extends FragmentActivity
 {
+    RouteServer routeServer;
 	
 	boolean useTransit;
 	GeoPoint orig;
@@ -38,6 +39,8 @@ public class MainActivity extends FragmentActivity
     public void onCreate(final Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        
+        routeServer = new RouteServer("wideworld.media.mit.edu", "bos");
         
         ActionBar actionBar = this.getActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
