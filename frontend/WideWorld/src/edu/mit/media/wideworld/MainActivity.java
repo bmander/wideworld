@@ -30,6 +30,14 @@ public class MainActivity extends FragmentActivity
 	boolean useTransit;
 	GeoPoint orig;
 	GeoPoint dest;
+	
+	static int TERMINUS_GPS = 1;
+	static int TERMINUS_ADDRESS = 2;
+	static int TERMINUS_BLANK = 3;
+	static int TERMINUS_MAP = 4;
+	
+	int orig_state = TERMINUS_BLANK;
+	int dest_state = TERMINUS_BLANK;
 
     // ===========================================================
     // Constructors

@@ -12,9 +12,14 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/orig_button"
         android:ems="10"
         android:hint="@string/orig_hint"
         android:inputType="text" />
+
+    <requestFocus
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
     <EditText
         android:id="@+id/dest_text"
@@ -25,8 +30,6 @@
         android:ems="10"
         android:hint="@string/dest_hint"
         android:inputType="text" >
-
-        <requestFocus android:layout_width="match_parent" />
     </EditText>
 
     <ProgressBar
@@ -34,7 +37,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/orig_text"
-        android:layout_alignParentRight="true"
+        android:layout_alignRight="@+id/orig_text"
         android:layout_alignParentTop="true"
         android:visibility="gone" />
 
@@ -64,30 +67,23 @@
         android:onClick="onCheckboxClicked"
         android:text="@string/checkbox_usetransit" />
 
-    <LinearLayout
+    <ListView
         android:id="@+id/orig_dropdown"
+        style="@style/ListDivider"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/orig_text"
         android:layout_below="@+id/orig_text"
-        android:orientation="vertical"
-        android:padding="5dp"
-        android:visibility="gone"
-    	android:divider="@drawable/one"
-    	android:dividerPadding="12dip"
-    	android:showDividers="middle"
         android:background="#ffffff"
-         >
+        android:visibility="gone" >
+    </ListView>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="bizbaz" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="foobar" />
-    </LinearLayout>
+    <Button
+        android:id="@+id/orig_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/orig_text"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true" />
 
 </RelativeLayout>

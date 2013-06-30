@@ -25,10 +25,14 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -45,6 +49,7 @@ public class ControlFragment extends Fragment {
 	
 	static int GEOCODE_FAIL = 1;
 	static int GEOCODE_SUCCESS = 2;
+
 	
 	class GetAddressTask extends AsyncTask<String,Void,Void> {
 		
@@ -104,13 +109,13 @@ public class ControlFragment extends Fragment {
 	
 	static class GeocodeResponseHandler extends Handler {
 		
-		private LinearLayout dropdown;
+		private ListView dropdown;
 		private ProgressBar working;
 		
-		GeocodeResponseHandler(LinearLayout dropdown, ProgressBar working){
+		GeocodeResponseHandler(ListView orig_dropdown, ProgressBar working){
 			super();
 			
-			this.dropdown = dropdown;
+			this.dropdown = orig_dropdown;
 			this.working = working;
 		}
 		
@@ -120,21 +125,13 @@ public class ControlFragment extends Fragment {
 	    	
 	    	working.setVisibility(View.GONE);
 	    	
-	    	dropdown.removeAllViews();
-	    	
 	    	if( msg.arg1 == GEOCODE_FAIL ){
-				TextView foo = new TextView(dropdown.getContext());
-				foo.setText( "geocode fail" );
-				dropdown.addView( foo );
+				dropdown.setVisibility(View.GONE);
 	    	} else {
 		    	List<Address> geocodeResults = (List<Address>)msg.obj;
-		    	for(int i=0; i<geocodeResults.size(); i++){
-					TextView foo = new TextView(dropdown.getContext());
-					foo.setFocusable(true);
-					Address address = geocodeResults.get(i);
-					foo.setText( address.getAddressLine(0) + " " + address.getAddressLine(1) );
-					dropdown.addView( foo );
-		    	}
+		    	
+		    	AddressAdapter adapt = new AddressAdapter( geocodeResults );
+		    	dropdown.setAdapter( adapt );
 	    	}
 		    	
 			dropdown.setVisibility(View.VISIBLE);
@@ -147,145 +144,73 @@ public class ControlFragment extends Fragment {
 	GetAddressTask getAddressTask = null;
 	
 	ProgressBar orig_working;
-	LinearLayout orig_dropdown;
+	ListView orig_dropdown;
 	EditText orig_text;
-
+	Button orig_button;
+	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		
+		final MainActivity activity = (MainActivity)this.getActivity();
 		
 		final View fragView = inflater.inflate(R.layout.control_fragment, container, false);
 		
 		orig_working = (ProgressBar)fragView.findViewById(R.id.orig_working);
+		orig_text = (EditText)fragView.findViewById(R.id.orig_text);
+		orig_button = (Button)fragView.findViewById(R.id.orig_button);
 		
-		orig_dropdown = (LinearLayout)fragView.findViewById( R.id.orig_dropdown );
-		//orig_dropdown.setBackgroundColor( Color.WHITE );
-		geocodeResponseHandler = new GeocodeResponseHandler(orig_dropdown, orig_working);
-		//orig_dropdown.removeAllViews();
-		
-//		TextView foo = new TextView(fragView.getContext());
-//		foo.setText("foobarbar");
-//		orig_dropdown.addView( foo );
-		
-		View orig_text_field = fragView.findViewById( R.id.orig_text );
-		EditText orig_text = (EditText)fragView.findViewById(R.id.orig_text);
+		orig_dropdown = (ListView)fragView.findViewById( R.id.orig_dropdown );
+		orig_dropdown.setOnItemClickListener( new OnItemClickListener() {
 
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position,
+					long id) {
+				AddressAdapter data = (AddressAdapter)parent.getAdapter();
+				Address selected = data.getItem(position);
+				orig_text.setEnabled(false);
+				orig_text.setText( selected.getAddressLine(0) );
+				orig_dropdown.setVisibility(View.GONE);
+				activity.orig_state = MainActivity.TERMINUS_ADDRESS;
+				orig_button.setText("X");
+			}
+			
+		});
+		
+		orig_button.setText("GPS");
+		orig_button.setOnClickListener( new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				if(activity.orig_state == MainActivity.TERMINUS_BLANK){
+					activity.orig_state = MainActivity.TERMINUS_GPS;
+					orig_button.setText("X");
+					orig_text.setEnabled(false);
+					orig_text.setText("My Location");
+				} else {
+					activity.orig_state = MainActivity.TERMINUS_BLANK;
+					orig_button.setText("GPS");
+					orig_text.setEnabled(true);
+					orig_text.setText("");
+				} 
+			}
+			
+		});
+		
+		geocodeResponseHandler = new GeocodeResponseHandler(orig_dropdown, orig_working);
 		
 		geocoder = new Geocoder(fragView.getContext());
-//		
-//		final EditText orig_text_field = (EditText)fragView.findViewById(R.id.orig_text);
-//		
-//        CheckBox use_transit = (CheckBox)fragView.findViewById(R.id.checkbox_usetransit);
-//        use_transit.setChecked(true);
-//        
-//        Spinner spinner = (Spinner) fragView.findViewById(R.id.speed_spinner);
-//        // Create an ArrayAdapter using the string array and a default spinner layout
-//        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(fragView.getContext(),
-//             R.array.speeds_array, android.R.layout.simple_spinner_item);
-//        // Specify the layout to use when the list of choices appears
-//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//        // Apply the adapter to the spinner
-//        spinner.setAdapter(adapter);
-//        
-//        // respond to Go Button click
-//        final Button button = (Button) fragView.findViewById(R.id.go_button);
-//        button.setOnClickListener(new View.OnClickListener() {
-//            public void onClick(View v) {
-//            	MainActivity top = (MainActivity)getActivity();
-//            	            	
-//            	/* if there's an address in the origin box, use it as start point */
-//            	EditText orig_text_field = (EditText)fragView.findViewById(R.id.orig_text);
-//            	String orig_text = orig_text_field.getText().toString();
-//            	if( orig_text.length() > 0 ){
-//	            	try {
-//	            		//TODO use non-hardcoded bounding box
-//						List<Address> addresses = geocoder.getFromLocationName(orig_text, 1, 42.184267, -71.249771, 42.449301, 70.888595);
-//												
-//						if( addresses.size() > 0 ){
-//							Address addy = addresses.get(0);
-//							top.orig = new GeoPoint(addy.getLatitude(), addy.getLongitude());							
-//						}
-//						
-//					} catch (IOException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//            	}
-//            	
-//            	/* if there's an address in the dest box, use it as end point */
-//            	EditText dest_text_field = (EditText)fragView.findViewById(R.id.dest_text);
-//            	String dest_text = dest_text_field.getText().toString();
-//            	if( dest_text.length() > 0 ){
-//	            	try {
-//	            		//TODO use non-hardcoded bounding box
-//						List<Address> addresses = geocoder.getFromLocationName(dest_text, 1, 42.184267, -71.249771, 42.449301, 70.888595);
-//												
-//						if( addresses.size() > 0 ){
-//							Address addy = addresses.get(0);
-//							top.dest = new GeoPoint(addy.getLatitude(), addy.getLongitude());							
-//						}
-//						
-//					} catch (IOException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//            	}
-//            	
-//            	//Log.v("DEBUG", "orig text: "+orig_text.getText() );
-//            	
-//                Log.v("DEBUG", "CLICK YO");
-//            }
-//        });
-//        
-//        final AutoCompleteTextView fromEdit = (AutoCompleteTextView)fragView.findViewById(R.id.orig_text);
-//        final ArrayAdapter<String> fa = new ArrayAdapter<String>(fragView.getContext(),
-//                android.R.layout.simple_dropdown_item_1line);
-//        
-//		mHandler = new Handler() {		
-//	        @SuppressWarnings("unchecked")
-//			@Override
-//	        public void handleMessage(Message msg) {
-//	        	Log.v("DEBUG", "message caught");
-//	        	fa.clear();
-//	        	
-//	        	List<String> geocodeResults = (List<String>)msg.obj;
-//	        	
-//	        	for(int i=0; i<geocodeResults.size(); i++){
-//	        		fa.add( geocodeResults.get(i) );
-//	        	}
-//	        	fromEdit.showDropDown();
-//	        }
-//		};
-//		class GetAddressTask extends AsyncTask<String,Void,Void> {
-//
-//			@Override
-//			protected Void doInBackground(String... arg0) {
-//				try {
-//					String locString = arg0[0];
-//					Log.v("DEBUG", "geocode this: "+locString);
-//					List<Address> addresses = geocoder.getFromLocationName(locString, 1, 42.184267, -71.249771, 42.449301, 70.888595);
-//				
-//					List<String> resp = new ArrayList<String>();
-//					for(int i=0; i<addresses.size(); i++){
-//						resp.add( addresses.get(i).getAddressLine(0) );
-//						Log.v("DEBUG", addresses.get(i).toString() );
-//					}
-//					
-//					resp.add( locString+"-blah" );
-//					
-//					Message msg = new Message();
-//					msg.obj = resp;
-//					mHandler.sendMessage(msg);
-//				} catch (IOException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//				
-//				return null;
-//			}
-//			
-//		}
-//
+
+        CheckBox use_transit = (CheckBox)fragView.findViewById(R.id.checkbox_usetransit);
+        use_transit.setChecked( activity.useTransit );
+        
+        Spinner spinner = (Spinner) fragView.findViewById(R.id.speed_spinner);
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(fragView.getContext(),
+             R.array.speeds_array, android.R.layout.simple_spinner_item);
+        // Specify the layout to use when the list of choices appears
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        spinner.setAdapter(adapter);
+
         orig_text.addTextChangedListener( new TextWatcher() {
 
 			@Override
@@ -305,8 +230,10 @@ public class ControlFragment extends Fragment {
 			public void onTextChanged(CharSequence arg0, int arg1, int arg2,
 					int arg3) {
 				
-				Log.v("DEBUG", arg0.toString() );
-				
+				if( activity.orig_state != MainActivity.TERMINUS_BLANK ){
+					return;
+				}
+								
 				if( arg0.length()<2 ){
 					orig_working.setVisibility(View.GONE);
 					orig_dropdown.setVisibility(View.GONE);
@@ -323,30 +250,10 @@ public class ControlFragment extends Fragment {
 				orig_working.setVisibility(View.VISIBLE);
 				getAddressTask = new GetAddressTask(geocodeResponseHandler, geocoder);
 				getAddressTask.execute( arg0.toString() );
-				
-				
-//				try {
-//					List<Address> addresses = geocoder.getFromLocationName(arg0.toString(), 1, 42.184267, -71.249771, 42.449301, 70.888595);
-//					Log.v("DEBUG", addresses.toString());
-//				} catch (IOException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-
-				//new GetAddressTask().execute(arg0.toString());
-				
-//			    PopupMenu popup = new PopupMenu(fragView.getContext(), orig_text_field);
-//			    MenuInflater inflater = popup.getMenuInflater();
-//			    inflater.inflate(R.menu.blank, popup.getMenu());
-//			    Menu blank = popup.getMenu();
-//			    blank.add("foobar");
-//			    blank.add("bizbaz");
-//			    popup.show();
 
 			}
         	
         });
-//        fromEdit.setAdapter(fa);
 		
 		return fragView;
 	}
