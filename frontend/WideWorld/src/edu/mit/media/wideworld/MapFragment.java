@@ -223,8 +223,8 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
     	mMapView.invalidate();
     }
 	
-	private void removeDestinationIcon() {
-		if( origOverlay != null ){
+	void removeDestinationIcon() {
+		if( destOverlay != null ){
 			mMapView.getOverlays().remove( destOverlay );
 			destOverlay = null;
 			mMapView.invalidate();
@@ -369,18 +369,12 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         	AlertDialog.Builder builder = new AlertDialog.Builder(context);
         	builder.setPositiveButton("Destination", new DialogInterface.OnClickListener(){
         		public void onClick(DialogInterface dialog, int id){
-//        			top.dest = pt;
-//        			findAndDisplayRoute();
-        			setDestinationIcon( pt );
-        			top.setDestinationFromMap( pt );
+        			top.dest.setFromMap( pt );
         		}
         	});
         	builder.setNegativeButton("Origin", new DialogInterface.OnClickListener(){
         		public void onClick(DialogInterface dialog, int id){
-//        			top.orig = pt;
-//        			findAndDisplayRoute();
-        			//setOriginIcon( pt );
-        			top.setOriginFromMap( pt );
+        			top.orig.setFromMap( pt );
         		}
         	});
         	builder.setCancelable(true);

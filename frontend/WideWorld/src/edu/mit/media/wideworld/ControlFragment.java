@@ -8,8 +8,6 @@ import org.osmdroid.util.GeoPoint;
 
 import android.annotation.TargetApi;
 import android.app.Fragment;
-import android.content.Context;
-import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.AsyncTask;
@@ -20,29 +18,20 @@ import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.Toast;
+
 
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class ControlFragment extends Fragment {
@@ -136,23 +125,23 @@ public class ControlFragment extends Fragment {
 	}
 	
 	class LocationPicker {
-		MainActivity root;
+		MainActivity.TerminusManager terminus;
 		ProgressBar working;
 		ListView dropdown;
 		EditText text;
 		Button button;
 		
-		LocationPicker( final MainActivity root, final ProgressBar working, final ListView dropdown, EditText text, Button button ){
-			this.root = root;
+		LocationPicker( final MainActivity.TerminusManager terminus, final ProgressBar working, final ListView dropdown, EditText text, Button button ){
+			this.terminus = terminus;
 			this.working = working;
 			this.dropdown = dropdown;
 			this.text = text;
 			this.button = button;
 			
-			if( root.orig_state == MainActivity.TERMINUS_BLANK){
+			if( terminus.type == MainActivity.TerminusManager.BLANK){
 				clear();
-			} else if( root.orig_state == MainActivity.TERMINUS_MAP ){
-				setFromMap( root.getOrigin() );
+			} else if( terminus.type == MainActivity.TerminusManager.MAP ){
+				setFromMap( terminus.pt );
 			}
 			
 			this.dropdown.setOnItemClickListener( new OnItemClickListener() {
@@ -160,11 +149,10 @@ public class ControlFragment extends Fragment {
 				@Override
 				public void onItemClick(AdapterView<?> parent, View view, int position,
 						long id) {
-					root.orig_state = MainActivity.TERMINUS_ADDRESS;
 					AddressAdapter data = (AddressAdapter)parent.getAdapter();
 					Address selected = data.getItem(position);
 					
-					root.setOriginFromAddress( selected );
+					terminus.setFromAddress( selected );
 				}
 				
 			});
@@ -173,15 +161,16 @@ public class ControlFragment extends Fragment {
 
 				@Override
 				public void onClick(View arg0) {
-					if(root.orig_state == MainActivity.TERMINUS_BLANK){
-						((MainActivity)getActivity()).setOriginFromMyLocation();
+					if(terminus.type == MainActivity.TerminusManager.BLANK){
+						terminus.setFromMyLocation();
 					} else {
-						((MainActivity)getActivity()).clearOrigin();
+						terminus.clear();
 					} 
 				}
 
 			});
 
+			final LocationPicker superthis = this;
 			this.text.addTextChangedListener( new TextWatcher() {
 
 				@Override
@@ -201,7 +190,7 @@ public class ControlFragment extends Fragment {
 				public void onTextChanged(CharSequence arg0, int arg1, int arg2,
 						int arg3) {
 
-					if( root.orig_state != MainActivity.TERMINUS_BLANK ){
+					if( terminus.type != MainActivity.TerminusManager.BLANK ){
 						return;
 					}
 
@@ -219,7 +208,8 @@ public class ControlFragment extends Fragment {
 					}
 
 					working.setVisibility(View.VISIBLE);
-					getAddressTask = new GetAddressTask(geocodeResponseHandler, geocoder);
+					GeocodeResponseHandler hh = new GeocodeResponseHandler(superthis);
+					getAddressTask = new GetAddressTask(hh, geocoder);
 					getAddressTask.execute( arg0.toString() );
 
 				}
@@ -265,13 +255,10 @@ public class ControlFragment extends Fragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate( savedInstanceState );
-		Log.v("DEBUG", "create control" );
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
-		Log.v("DEBUG", "create control view");
 
 		final MainActivity activity = (MainActivity)this.getActivity();
 
@@ -281,13 +268,13 @@ public class ControlFragment extends Fragment {
 		EditText o_text = (EditText)fragView.findViewById(R.id.orig_text);
 		Button o_button = (Button)fragView.findViewById(R.id.orig_button);
 		ListView o_dropdown = (ListView)fragView.findViewById( R.id.orig_dropdown );
-		orig = new LocationPicker( activity, o_working, o_dropdown, o_text, o_button );
+		orig = new LocationPicker( activity.orig, o_working, o_dropdown, o_text, o_button );
 		
 		ProgressBar d_working = (ProgressBar)fragView.findViewById(R.id.dest_working);
 		EditText d_text = (EditText)fragView.findViewById(R.id.dest_text);
 		Button d_button = (Button)fragView.findViewById(R.id.dest_button);
 		ListView d_dropdown = (ListView)fragView.findViewById( R.id.dest_dropdown );
-		dest = new LocationPicker( activity, d_working, d_dropdown, d_text, d_button );
+		dest = new LocationPicker( activity.dest, d_working, d_dropdown, d_text, d_button );
 		
 		geocodeResponseHandler = new GeocodeResponseHandler(orig);
 		

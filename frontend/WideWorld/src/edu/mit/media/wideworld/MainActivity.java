@@ -25,19 +25,121 @@ import android.widget.CheckBox;
 @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
 public class MainActivity extends FragmentActivity
 {
+	class TerminusManager{
+		static final int GPS = 1;
+		static final int ADDRESS = 2;
+		static final int BLANK = 3;
+		static final int MAP = 4;
+		
+		static final int ORIG = 1;
+		static final int DEST = 2;
+		
+		MainActivity activity;
+		GeoPoint pt=null;
+		int type;
+		int end;
+		
+		TerminusManager(MainActivity activity, int end){
+			this.type = BLANK;
+			this.end = end;
+			this.activity = activity;
+		}
+		
+		public void clear() {
+			this.type = TerminusManager.BLANK;
+			this.pt = null;
+			
+			MapFragment mapFrag = (MapFragment) getFragmentManager().findFragmentByTag("map");
+			if( mapFrag!=null){
+				if( end == ORIG ){
+					mapFrag.removeOriginIcon();
+				} else if (end == DEST ){
+					mapFrag.removeDestinationIcon();
+				}
+			}
+			ControlFragment navFrag = (ControlFragment) getFragmentManager().findFragmentByTag("nav");
+			if(navFrag!=null){
+				if( end == ORIG){
+					navFrag.orig.clear();
+				} else if (end==DEST){
+					navFrag.dest.clear();
+				}
+			}
+		}
+		
+		public void setFromAddress(Address selected) {
+			this.pt = new GeoPoint( selected.getLatitude(), selected.getLongitude() );
+			this.type = TerminusManager.ADDRESS;
+			
+			MapFragment mapFrag = (MapFragment) getFragmentManager().findFragmentByTag("map");
+			if(mapFrag!=null){
+				if( this.end == ORIG ){
+					mapFrag.setOriginIcon( pt );
+				} else if( this.end == DEST ){
+					mapFrag.setDestinationIcon( pt );
+				}
+			}
+			ControlFragment navFrag = (ControlFragment) getFragmentManager().findFragmentByTag("nav");
+			if(navFrag!=null){
+				if( this.end == ORIG ) {
+					navFrag.orig.setFromAddress( selected );
+				} else if (this.end == DEST) {
+					navFrag.dest.setFromAddress( selected );
+				}
+			}
+
+		}
+		
+		public void setFromMyLocation() {
+			type = TerminusManager.GPS;
+			
+			MapFragment mapFrag = (MapFragment) getFragmentManager().findFragmentByTag("map");
+			if(mapFrag!=null){
+				if( this.end == ORIG ){
+					mapFrag.removeOriginIcon();
+				} else if (this.end == DEST) {
+					mapFrag.removeDestinationIcon();
+				}
+			}
+			ControlFragment navFrag = (ControlFragment) getFragmentManager().findFragmentByTag("nav");
+			if(navFrag!=null){
+				if( this.end == ORIG ){
+					navFrag.orig.setFromMyLocation();
+				} else {
+					navFrag.dest.setFromMyLocation();
+				}
+			}
+		}
+		
+		public void setFromMap(GeoPoint pt) {
+			this.pt = pt;
+			type = TerminusManager.MAP;
+			
+			ControlFragment navFragment = (ControlFragment) getFragmentManager().findFragmentByTag("nav");
+			if(navFragment != null){
+				if( this.end == ORIG ){
+					navFragment.orig.setFromMap( pt );
+				} else if( this.end == DEST ){
+					navFragment.dest.setFromMap( pt );
+				}
+			}
+			MapFragment mapFrag = (MapFragment) getFragmentManager().findFragmentByTag("map");
+			if(mapFrag!=null){
+				if( this.end == ORIG ){
+					mapFrag.setOriginIcon( pt );
+				} else if (this.end == DEST){
+					mapFrag.setDestinationIcon( pt );
+				}
+			}
+		}
+		
+	}
+	
     RouteServer routeServer;
 	
 	boolean useTransit;
-	private GeoPoint orig;
-	private GeoPoint dest;
-	
-	static int TERMINUS_GPS = 1;
-	static int TERMINUS_ADDRESS = 2;
-	static int TERMINUS_BLANK = 3;
-	static int TERMINUS_MAP = 4;
-	
-	int orig_state = TERMINUS_BLANK;
-	int dest_state = TERMINUS_BLANK;
+	TerminusManager orig;
+	TerminusManager dest;
 	
 	LocationManager locationManager;
 	
@@ -48,6 +150,9 @@ public class MainActivity extends FragmentActivity
     public void onCreate(final Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        
+        orig = new TerminusManager(this, TerminusManager.ORIG);
+        dest = new TerminusManager(this, TerminusManager.DEST);
         
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         
@@ -134,17 +239,6 @@ public class MainActivity extends FragmentActivity
 	}
 
 
-	public void setDestinationFromMap(GeoPoint pt) {
-		Log.v("DEBUG", "set destination from map");
-		dest = pt;
-		dest_state = TERMINUS_MAP;
-		
-		ControlFragment navFragment = (ControlFragment) getFragmentManager().findFragmentByTag("nav");
-		if(navFragment != null){
-			//navFragment.setDestinationFromMap( pt );
-		}
-	}
-
 	public void findAndDisplayRoute() {
 		MapFragment mapFrag = (MapFragment) getFragmentManager().findFragmentByTag("map");
 		if(mapFrag != null){
@@ -152,76 +246,19 @@ public class MainActivity extends FragmentActivity
 		}
 	}
 
-	public void setOriginFromAddress(Address selected) {
-		orig = new GeoPoint( selected.getLatitude(), selected.getLongitude() );
-		orig_state = TERMINUS_ADDRESS;
-		
-		MapFragment mapFrag = (MapFragment) getFragmentManager().findFragmentByTag("map");
-		if(mapFrag!=null){
-			mapFrag.setOriginIcon( orig );
-		}
-		ControlFragment navFrag = (ControlFragment) getFragmentManager().findFragmentByTag("nav");
-		if(navFrag!=null){
-			navFrag.orig.setFromAddress( selected );
-		}
-
-	}
-
-	public void setOriginFromMyLocation() {
-		orig_state = MainActivity.TERMINUS_GPS;
-		
-		MapFragment mapFrag = (MapFragment) getFragmentManager().findFragmentByTag("map");
-		if(mapFrag!=null){
-			mapFrag.removeOriginIcon();
-		}
-		ControlFragment navFrag = (ControlFragment) getFragmentManager().findFragmentByTag("nav");
-		if(navFrag!=null){
-			navFrag.orig.setFromMyLocation();
-		}
-	}
-
-	public void setOriginFromMap(GeoPoint pt) {
-		Log.v("DEBUG", "set origin from map");
-		orig = pt;
-		orig_state = TERMINUS_MAP;
-		
-		ControlFragment navFragment = (ControlFragment) getFragmentManager().findFragmentByTag("nav");
-		if(navFragment != null){
-			navFragment.orig.setFromMap( pt );
-		}
-		MapFragment mapFrag = (MapFragment) getFragmentManager().findFragmentByTag("map");
-		if(mapFrag!=null){
-			mapFrag.setOriginIcon( orig );
-		}
-	}
-
-	public void clearOrigin() {
-		orig_state = MainActivity.TERMINUS_BLANK;
-		orig = null;
-		
-		MapFragment mapFrag = (MapFragment) getFragmentManager().findFragmentByTag("map");
-		if( mapFrag!=null){
-			mapFrag.removeOriginIcon();
-		}
-		ControlFragment navFrag = (ControlFragment) getFragmentManager().findFragmentByTag("nav");
-		if(navFrag!=null){
-			navFrag.orig.clear();
-		}
-	}
-
 	public GeoPoint getOrigin() {
-		if( orig_state == TERMINUS_GPS ){
+		if( orig.type == TerminusManager.GPS ){
 			return getBestCachedGPSLocation();
 		} else {
-			return orig;
+			return orig.pt;
 		}
 	}
 
 	public GeoPoint getDestination() {
-		if( dest_state == TERMINUS_GPS ){
+		if( dest.type == TerminusManager.GPS ){
 			return getBestCachedGPSLocation();
 		} else {
-			return dest;
+			return dest.pt;
 		}
 	}
 
