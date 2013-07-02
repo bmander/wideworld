@@ -27,6 +27,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/orig_text"
+        android:layout_toLeftOf="@+id/dest_button"
         android:ems="10"
         android:hint="@string/dest_hint"
         android:inputType="text" >
@@ -39,6 +40,14 @@
         android:layout_alignBottom="@+id/orig_text"
         android:layout_alignRight="@+id/orig_text"
         android:layout_alignParentTop="true"
+        android:visibility="gone" />
+    
+    <ProgressBar
+        android:id="@+id/dest_working"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/dest_text"
+        android:layout_alignRight="@+id/dest_text"
         android:visibility="gone" />
 
     <Spinner
@@ -77,6 +86,17 @@
         android:background="#ffffff"
         android:visibility="gone" >
     </ListView>
+    
+    <ListView
+        android:id="@+id/dest_dropdown"
+        style="@style/ListDivider"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/dest_text"
+        android:layout_below="@+id/dest_text"
+        android:background="#ffffff"
+        android:visibility="gone" >
+    </ListView>
 
     <Button
         android:id="@+id/orig_button"
@@ -85,5 +105,22 @@
         android:layout_alignBottom="@+id/orig_text"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true" />
+    
+    <Button
+        android:id="@+id/dest_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/dest_text"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/dest_text" />
+
+    <ImageView
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_below="@+id/speed_spinner"
+        android:layout_marginTop="42dp"
+        android:layout_toRightOf="@+id/go_button"
+        android:contentDescription="test"
+        android:src="@drawable/start_icon" />
 
 </RelativeLayout>

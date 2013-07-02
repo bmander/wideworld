@@ -148,13 +148,28 @@ public class ControlFragment extends Fragment {
 	EditText orig_text;
 	Button orig_button;
 	
+	ProgressBar dest_working;
+	ListView dest_dropdown;
+	EditText dest_text;
+	Button dest_button;
+	
+	@Override
+	public void onCreate(Bundle savedInstanceState){
+		super.onCreate( savedInstanceState );
+		Log.v("DEBUG", "create control" );
+	}
+	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		
+		Log.v("DEBUG", "create control view");
+		
 		final MainActivity activity = (MainActivity)this.getActivity();
 		
 		final View fragView = inflater.inflate(R.layout.control_fragment, container, false);
 		
 		orig_working = (ProgressBar)fragView.findViewById(R.id.orig_working);
+		dest_working = (ProgressBar)fragView.findViewById(R.id.dest_working);
 		orig_text = (EditText)fragView.findViewById(R.id.orig_text);
 		orig_button = (Button)fragView.findViewById(R.id.orig_button);
 		
@@ -164,32 +179,29 @@ public class ControlFragment extends Fragment {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position,
 					long id) {
+				activity.orig_state = MainActivity.TERMINUS_ADDRESS;
 				AddressAdapter data = (AddressAdapter)parent.getAdapter();
 				Address selected = data.getItem(position);
-				orig_text.setEnabled(false);
-				orig_text.setText( selected.getAddressLine(0) );
-				orig_dropdown.setVisibility(View.GONE);
-				activity.orig_state = MainActivity.TERMINUS_ADDRESS;
-				orig_button.setText("X");
+				
+				activity.setOriginFromAddress( selected );
 			}
 			
 		});
 		
-		orig_button.setText("GPS");
+		if( activity.orig_state == MainActivity.TERMINUS_BLANK){
+			clearOriginUI();
+		} else if( activity.orig_state == MainActivity.TERMINUS_MAP ){
+			setOriginFromMapUI( activity.getOrigin() );
+		}
+		
 		orig_button.setOnClickListener( new OnClickListener() {
 
 			@Override
 			public void onClick(View arg0) {
 				if(activity.orig_state == MainActivity.TERMINUS_BLANK){
-					activity.orig_state = MainActivity.TERMINUS_GPS;
-					orig_button.setText("X");
-					orig_text.setEnabled(false);
-					orig_text.setText("My Location");
+					((MainActivity)getActivity()).setOriginFromMyLocation();
 				} else {
-					activity.orig_state = MainActivity.TERMINUS_BLANK;
-					orig_button.setText("GPS");
-					orig_text.setEnabled(true);
-					orig_text.setText("");
+					((MainActivity)getActivity()).clearOrigin();
 				} 
 			}
 			
@@ -202,13 +214,11 @@ public class ControlFragment extends Fragment {
         CheckBox use_transit = (CheckBox)fragView.findViewById(R.id.checkbox_usetransit);
         use_transit.setChecked( activity.useTransit );
         
+        // set up speed spinner
         Spinner spinner = (Spinner) fragView.findViewById(R.id.speed_spinner);
-        // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(fragView.getContext(),
              R.array.speeds_array, android.R.layout.simple_spinner_item);
-        // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        // Apply the adapter to the spinner
         spinner.setAdapter(adapter);
 
         orig_text.addTextChangedListener( new TextWatcher() {
@@ -254,9 +264,58 @@ public class ControlFragment extends Fragment {
 			}
         	
         });
+        
+        Button go_button = (Button)fragView.findViewById(R.id.go_button);
+        go_button.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View arg0) {
+				activity.findAndDisplayRoute();
+			}
+        	
+        });
 		
 		return fragView;
 	}
+	
+	protected void clearOriginUI(){
+		orig_button.setText("GPS");
+		orig_text.setEnabled(true);
+		orig_text.setText("");
+	}
+
+	protected void setOriginFromMyLocationUI() {
+		orig_button.setText("X");
+		orig_text.setEnabled(false);
+		orig_text.setText("My Location");
+	}
+
+	public void setOriginFromMapUI(GeoPoint pt) {
+		Log.v("DEBUG", "updating origin UI");
+		orig_working.setVisibility(View.GONE);
+		orig_dropdown.setVisibility(View.GONE);
+		orig_button.setText("X");
+		orig_text.setText("FROM MAP");
+		orig_text.setEnabled(false);
+	}
+	
+	public void setOriginFromAddressUI( Address address ) {
+		orig_text.setEnabled(false);
+		orig_text.setText( address.getAddressLine(0) );
+		orig_dropdown.setVisibility(View.GONE);
+		orig_button.setText("X");
+	}
+
+	public void setDestinationFromMap(GeoPoint pt) {
+		Log.v("DEBUG", "updating destination UI");
+//		dest_working.setVisibility(View.GONE);
+//		dest_dropdown.setVisibility(View.GONE);
+//		dest_button.setText("X");
+//		dest_text.setText("FROM MAP");
+//		dest_text.setEnabled(false);
+	}
+
+
 	
 
 

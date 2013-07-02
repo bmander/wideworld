@@ -1,5 +1,7 @@
 package edu.mit.media.wideworld;
 
+import java.util.List;
+
 import org.osmdroid.util.GeoPoint;
 
 import android.annotation.TargetApi;
@@ -10,14 +12,12 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
+import android.location.Address;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.StrictMode;
-import android.os.StrictMode.ThreadPolicy;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
@@ -28,8 +28,8 @@ public class MainActivity extends FragmentActivity
     RouteServer routeServer;
 	
 	boolean useTransit;
-	GeoPoint orig;
-	GeoPoint dest;
+	private GeoPoint orig;
+	private GeoPoint dest;
 	
 	static int TERMINUS_GPS = 1;
 	static int TERMINUS_ADDRESS = 2;
@@ -38,15 +38,18 @@ public class MainActivity extends FragmentActivity
 	
 	int orig_state = TERMINUS_BLANK;
 	int dest_state = TERMINUS_BLANK;
-
+	
+	LocationManager locationManager;
+	
     // ===========================================================
     // Constructors
     // ===========================================================
-    /** Called when the activity is first created. */
     @Override
     public void onCreate(final Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        
+        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         
         routeServer = new RouteServer("wideworld.media.mit.edu", "bos");
         
@@ -66,13 +69,15 @@ public class MainActivity extends FragmentActivity
 
 			@Override
 			public void onTabSelected(Tab arg0, FragmentTransaction ft) {
+				
 				Fragment mapFragment = superthis.getFragmentManager().findFragmentByTag("map");
 				
 				if( mapFragment == null ){
 					mapFragment = new MapFragment();
 					ft.add( android.R.id.content, mapFragment, "map" );
 				} else {
-					ft.attach(mapFragment);
+					//ft.attach(mapFragment);
+					mapFragment.getView().setVisibility(View.VISIBLE);
 				}
 				
 			}
@@ -80,7 +85,8 @@ public class MainActivity extends FragmentActivity
 			@Override
 			public void onTabUnselected(Tab arg0, FragmentTransaction ft) {
 				Fragment mapFragment = superthis.getFragmentManager().findFragmentByTag("map");
-				ft.detach( mapFragment );				
+//				ft.detach( mapFragment );	
+				mapFragment.getView().setVisibility(View.GONE);
 			}
         	
         });
@@ -98,19 +104,21 @@ public class MainActivity extends FragmentActivity
 			@Override
 			public void onTabSelected(Tab arg0, FragmentTransaction ft) {
 				Fragment navFragment = superthis.getFragmentManager().findFragmentByTag("nav");
-				
+						
 				if( navFragment == null ) {
 					navFragment = new ControlFragment();
 					ft.add( android.R.id.content, navFragment, "nav" );
 				} else {
-					ft.attach(navFragment);
+					//ft.attach(navFragment);
+					navFragment.getView().setVisibility(View.VISIBLE);
 				}
 			}
 
 			@Override
 			public void onTabUnselected(Tab arg0, FragmentTransaction ft) {
 				Fragment navFragment = superthis.getFragmentManager().findFragmentByTag("nav");
-				ft.detach( navFragment );	
+//				ft.detach( navFragment );	
+				navFragment.getView().setVisibility(View.GONE);
 			}
         	
         });
@@ -124,6 +132,116 @@ public class MainActivity extends FragmentActivity
 	    this.useTransit = ((CheckBox) view).isChecked();
 	    	    
 	}
+
+
+	public void setDestinationFromMap(GeoPoint pt) {
+		Log.v("DEBUG", "set destination from map");
+		dest = pt;
+		dest_state = TERMINUS_MAP;
+		
+		ControlFragment navFragment = (ControlFragment) getFragmentManager().findFragmentByTag("nav");
+		if(navFragment != null){
+			navFragment.setDestinationFromMap( pt );
+		}
+	}
+
+	public void findAndDisplayRoute() {
+		MapFragment mapFrag = (MapFragment) getFragmentManager().findFragmentByTag("map");
+		if(mapFrag != null){
+			mapFrag.findAndDisplayRoute();
+		}
+	}
+
+	public void setOriginFromAddress(Address selected) {
+		orig = new GeoPoint( selected.getLatitude(), selected.getLongitude() );
+		orig_state = TERMINUS_ADDRESS;
+		
+		MapFragment mapFrag = (MapFragment) getFragmentManager().findFragmentByTag("map");
+		if(mapFrag!=null){
+			mapFrag.setOriginIcon( orig );
+		}
+		ControlFragment navFrag = (ControlFragment) getFragmentManager().findFragmentByTag("nav");
+		if(navFrag!=null){
+			navFrag.setOriginFromAddressUI( selected );
+		}
+
+	}
+
+	public void setOriginFromMyLocation() {
+		orig_state = MainActivity.TERMINUS_GPS;
+		
+		MapFragment mapFrag = (MapFragment) getFragmentManager().findFragmentByTag("map");
+		if(mapFrag!=null){
+			mapFrag.removeOriginIcon();
+		}
+		ControlFragment navFrag = (ControlFragment) getFragmentManager().findFragmentByTag("nav");
+		if(navFrag!=null){
+			navFrag.setOriginFromMyLocationUI();
+		}
+	}
+
+	public void setOriginFromMap(GeoPoint pt) {
+		Log.v("DEBUG", "set origin from map");
+		orig = pt;
+		orig_state = TERMINUS_MAP;
+		
+		ControlFragment navFragment = (ControlFragment) getFragmentManager().findFragmentByTag("nav");
+		if(navFragment != null){
+			navFragment.setOriginFromMapUI( pt );
+		}
+		MapFragment mapFrag = (MapFragment) getFragmentManager().findFragmentByTag("map");
+		if(mapFrag!=null){
+			mapFrag.setOriginIcon( orig );
+		}
+	}
+
+	public void clearOrigin() {
+		orig_state = MainActivity.TERMINUS_BLANK;
+		orig = null;
+		
+		MapFragment mapFrag = (MapFragment) getFragmentManager().findFragmentByTag("map");
+		if( mapFrag!=null){
+			mapFrag.removeOriginIcon();
+		}
+		ControlFragment navFrag = (ControlFragment) getFragmentManager().findFragmentByTag("nav");
+		if(navFrag!=null){
+			navFrag.clearOriginUI();
+		}
+	}
+
+	public GeoPoint getOrigin() {
+		if( orig_state == TERMINUS_GPS ){
+			return getBestCachedGPSLocation();
+		} else {
+			return orig;
+		}
+	}
+
+	public GeoPoint getDestination() {
+		if( dest_state == TERMINUS_GPS ){
+			return getBestCachedGPSLocation();
+		} else {
+			return dest;
+		}
+	}
+
+	private GeoPoint getBestCachedGPSLocation() {
+		List<String> providers = locationManager.getAllProviders();
+		Location bestLocation = null;
+		for(int i=0; i<providers.size(); i++){
+			String provider = providers.get(i);
+			Location location = locationManager.getLastKnownLocation( provider );
+			if( bestLocation==null || location.getAccuracy()<bestLocation.getAccuracy() ){
+				bestLocation = location;
+			}
+		}
+		if( bestLocation==null ){
+			return null;
+		}
+		return new GeoPoint( bestLocation.getLatitude(), bestLocation.getLongitude() );
+	}
+
+
 
     
 }

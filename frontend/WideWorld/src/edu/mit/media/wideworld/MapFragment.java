@@ -12,8 +12,11 @@ import org.osmdroid.tileprovider.tilesource.ITileSource;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.ItemizedIconOverlay;
+import org.osmdroid.views.overlay.ItemizedOverlay;
 import org.osmdroid.views.overlay.MyLocationOverlay;
 import org.osmdroid.views.overlay.Overlay;
+import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.overlay.PathOverlay;
 
 import edu.mit.media.wideworld.constants.OpenStreetMapConstants;
@@ -23,8 +26,14 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.ShapeDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -57,6 +66,10 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
     private static MapView mMapView;
     private ResourceProxy mResourceProxy;
     private List<PathOverlay> mPathOverlays;
+    private Overlay origOverlay=null;
+    private Overlay destOverlay=null;
+    private MyLocationOverlay locOverlay = null;
+    
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -108,7 +121,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         Overlay overlay = new GestureOverlay(context);
 		mMapView.getOverlays().add(overlay);
 		
-		MyLocationOverlay locOverlay = new MyLocationOverlay(context, mMapView);	
+		locOverlay = new MyLocationOverlay(context, mMapView);	
 		mMapView.getOverlays().add(locOverlay);
 		locOverlay.enableMyLocation();
 		
@@ -145,22 +158,96 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         } catch (final IllegalArgumentException ignore) {
         }
     }
+    
+    public void setOriginIcon(GeoPoint pt){
+    	removeOriginIcon();
+    	
+    	OverlayItem originIcon = new OverlayItem("origin", "origin", pt);
+    	List<OverlayItem> icons = new ArrayList<OverlayItem>();
+    	icons.add( originIcon );
+    	origOverlay = new ItemizedIconOverlay<OverlayItem>(this.getActivity(), icons, new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
+
+			@Override
+			public boolean onItemLongPress(int arg0, OverlayItem arg1) {
+				// TODO Auto-generated method stub
+				return false;
+			}
+
+			@Override
+			public boolean onItemSingleTapUp(int arg0, OverlayItem arg1) {
+				// TODO Auto-generated method stub
+				return false;
+			}
+    		
+    	});
+
+    	
+    	mMapView.getOverlays().add( origOverlay );
+    	mMapView.invalidate();
+    }
 	
-	private void findAndDisplayRoute() {
+	void removeOriginIcon() {
+		if( origOverlay != null ){
+			mMapView.getOverlays().remove( origOverlay );
+			origOverlay = null;
+			mMapView.invalidate();
+		}
+	}
+	
+    public void setDestinationIcon(GeoPoint pt){
+    	removeDestinationIcon();
+    	
+    	OverlayItem destIcon = new OverlayItem("destination", "destination", pt);
+    	List<OverlayItem> icons = new ArrayList<OverlayItem>();
+    	icons.add( destIcon );
+    	destOverlay = new ItemizedIconOverlay<OverlayItem>(this.getActivity(), icons, new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
+
+			@Override
+			public boolean onItemLongPress(int arg0, OverlayItem arg1) {
+				// TODO Auto-generated method stub
+				return false;
+			}
+
+			@Override
+			public boolean onItemSingleTapUp(int arg0, OverlayItem arg1) {
+				// TODO Auto-generated method stub
+				return false;
+			}
+    		
+    	});
+
+    	
+    	mMapView.getOverlays().add( destOverlay );
+    	mMapView.invalidate();
+    }
+	
+	private void removeDestinationIcon() {
+		if( origOverlay != null ){
+			mMapView.getOverlays().remove( destOverlay );
+			destOverlay = null;
+			mMapView.invalidate();
+		}
+	}
+
+	protected void findAndDisplayRoute() {
 		final MainActivity context = (MainActivity)this.getActivity();
 		
 	    boolean useTransit = context.useTransit;
 		
-		if( context.orig==null || context.dest==null ){
+		if( context.getOrigin()==null || context.getDestination()==null ){
 			return;
 		}
 		
 		// get the orig and dest points
-		double lat1 = context.orig.getLatitudeE6()/1E6;
-		double lng1 = context.orig.getLongitudeE6()/1E6;
-		double lat2 = context.dest.getLatitudeE6()/1E6;
-		double lng2 = context.dest.getLongitudeE6()/1E6;
+		double lat1, lng1;
+		GeoPoint orig = context.getOrigin();
+		lat1 = orig.getLatitudeE6()/1E6;
+		lng1 = orig.getLongitudeE6()/1E6;
+		GeoPoint dest = context.getDestination();
+		double lat2 = dest.getLatitudeE6()/1E6;
+		double lng2 = dest.getLongitudeE6()/1E6;
 				
+		Log.v("DEBUG", "start get route...");
 		context.routeServer.getRoute(context.routeServer.new Request(lat1, lng1, lat2, lng2, useTransit, 4.5), new RouteServer.FetchRouteCallback(){
 			public void onResponse(RouteServer.Response resp){
 				// remove all the old paths from the map
@@ -234,6 +321,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				Log.v("DEBUG", "finish get route.");
 			}
 		});
 		
@@ -276,14 +364,18 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         	AlertDialog.Builder builder = new AlertDialog.Builder(context);
         	builder.setPositiveButton("Destination", new DialogInterface.OnClickListener(){
         		public void onClick(DialogInterface dialog, int id){
-        			top.dest = pt;
-        			findAndDisplayRoute();
+//        			top.dest = pt;
+//        			findAndDisplayRoute();
+        			setDestinationIcon( pt );
+        			top.setDestinationFromMap( pt );
         		}
         	});
         	builder.setNegativeButton("Origin", new DialogInterface.OnClickListener(){
         		public void onClick(DialogInterface dialog, int id){
-        			top.orig = pt;
-        			findAndDisplayRoute();
+//        			top.orig = pt;
+//        			findAndDisplayRoute();
+        			setOriginIcon( pt );
+        			top.setOriginFromMap( pt );
         		}
         	});
         	builder.setCancelable(true);
