@@ -13,7 +13,6 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.ItemizedIconOverlay;
-import org.osmdroid.views.overlay.ItemizedOverlay;
 import org.osmdroid.views.overlay.MyLocationOverlay;
 import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.OverlayItem;
@@ -26,14 +25,8 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.ShapeDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -171,13 +164,11 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 
 			@Override
 			public boolean onItemLongPress(int arg0, OverlayItem arg1) {
-				// TODO Auto-generated method stub
 				return false;
 			}
 
 			@Override
 			public boolean onItemSingleTapUp(int arg0, OverlayItem arg1) {
-				// TODO Auto-generated method stub
 				return false;
 			}
     		
@@ -206,13 +197,11 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 
 			@Override
 			public boolean onItemLongPress(int arg0, OverlayItem arg1) {
-				// TODO Auto-generated method stub
 				return false;
 			}
 
 			@Override
 			public boolean onItemSingleTapUp(int arg0, OverlayItem arg1) {
-				// TODO Auto-generated method stub
 				return false;
 			}
     		
@@ -320,7 +309,6 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 					mHandler.sendMessage(msg);
 					
 				} catch (JSONException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				Log.v("DEBUG", "finish get route.");
@@ -354,9 +342,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 		}
 
 		@Override
-		protected void draw(Canvas arg0, MapView arg1, boolean arg2) {
-			// TODO Auto-generated method stub
-			
+		protected void draw(Canvas arg0, MapView arg1, boolean arg2) {			
 		}
 		
         public boolean onLongPress(final MotionEvent e, final MapView mapView) {

@@ -77,7 +77,6 @@ public class ControlFragment extends Fragment {
 				msg.obj = addresses;
 				handler.sendMessage(msg);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 				Log.v("DEBUG", e.getMessage() );
 				
@@ -106,6 +105,7 @@ public class ControlFragment extends Fragment {
 			this.locPicker = locPicker;
 		}
 		
+		@SuppressWarnings("unchecked")
 		@Override
 	    public void handleMessage(Message msg) {	    	
 	    	locPicker.working.setVisibility(View.GONE);
@@ -175,15 +175,12 @@ public class ControlFragment extends Fragment {
 
 				@Override
 				public void afterTextChanged(Editable arg0) {
-					// TODO Auto-generated method stub
 
 				}
 
 				@Override
 				public void beforeTextChanged(CharSequence arg0, int arg1,
 						int arg2, int arg3) {
-					// TODO Auto-generated method stub
-
 				}
 
 				@Override
@@ -255,6 +252,8 @@ public class ControlFragment extends Fragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate( savedInstanceState );
+		
+		geocoder = new Geocoder(getActivity());
 	}
 
 	@Override
@@ -264,22 +263,21 @@ public class ControlFragment extends Fragment {
 
 		final View fragView = inflater.inflate(R.layout.control_fragment, container, false);
 		
+		// Build origin tri-picker
 		ProgressBar o_working = (ProgressBar)fragView.findViewById(R.id.orig_working);
 		EditText o_text = (EditText)fragView.findViewById(R.id.orig_text);
 		Button o_button = (Button)fragView.findViewById(R.id.orig_button);
 		ListView o_dropdown = (ListView)fragView.findViewById( R.id.orig_dropdown );
 		orig = new LocationPicker( activity.orig, o_working, o_dropdown, o_text, o_button );
 		
+		// Build destination tri-picker
 		ProgressBar d_working = (ProgressBar)fragView.findViewById(R.id.dest_working);
 		EditText d_text = (EditText)fragView.findViewById(R.id.dest_text);
 		Button d_button = (Button)fragView.findViewById(R.id.dest_button);
 		ListView d_dropdown = (ListView)fragView.findViewById( R.id.dest_dropdown );
 		dest = new LocationPicker( activity.dest, d_working, d_dropdown, d_text, d_button );
-		
-		geocodeResponseHandler = new GeocodeResponseHandler(orig);
-		
-		geocoder = new Geocoder(fragView.getContext());
-
+				
+		// "use transit" checkbox
         CheckBox use_transit = (CheckBox)fragView.findViewById(R.id.checkbox_usetransit);
         use_transit.setChecked( activity.useTransit );
         
@@ -290,6 +288,7 @@ public class ControlFragment extends Fragment {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
         
+        // Go! button
         Button go_button = (Button)fragView.findViewById(R.id.go_button);
         go_button.setOnClickListener(new OnClickListener(){
 

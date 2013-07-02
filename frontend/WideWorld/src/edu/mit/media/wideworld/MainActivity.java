@@ -18,7 +18,6 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 
@@ -167,9 +166,7 @@ public class MainActivity extends FragmentActivity
         mapTab.setTabListener( new TabListener(){
 
 			@Override
-			public void onTabReselected(Tab arg0, FragmentTransaction arg1) {
-				// TODO Auto-generated method stub
-				
+			public void onTabReselected(Tab arg0, FragmentTransaction arg1) {				
 			}
 
 			@Override
@@ -201,9 +198,7 @@ public class MainActivity extends FragmentActivity
         navTab.setTabListener( new TabListener(){
 
 			@Override
-			public void onTabReselected(Tab arg0, FragmentTransaction arg1) {
-				// TODO Auto-generated method stub
-				
+			public void onTabReselected(Tab arg0, FragmentTransaction arg1) {				
 			}
 
 			@Override
