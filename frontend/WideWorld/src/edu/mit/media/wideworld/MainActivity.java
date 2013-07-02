@@ -141,7 +141,7 @@ public class MainActivity extends FragmentActivity
 		
 		ControlFragment navFragment = (ControlFragment) getFragmentManager().findFragmentByTag("nav");
 		if(navFragment != null){
-			navFragment.setDestinationFromMap( pt );
+			//navFragment.setDestinationFromMap( pt );
 		}
 	}
 
@@ -162,7 +162,7 @@ public class MainActivity extends FragmentActivity
 		}
 		ControlFragment navFrag = (ControlFragment) getFragmentManager().findFragmentByTag("nav");
 		if(navFrag!=null){
-			navFrag.setOriginFromAddressUI( selected );
+			navFrag.orig.setFromAddress( selected );
 		}
 
 	}
@@ -176,7 +176,7 @@ public class MainActivity extends FragmentActivity
 		}
 		ControlFragment navFrag = (ControlFragment) getFragmentManager().findFragmentByTag("nav");
 		if(navFrag!=null){
-			navFrag.setOriginFromMyLocationUI();
+			navFrag.orig.setFromMyLocation();
 		}
 	}
 
@@ -187,7 +187,7 @@ public class MainActivity extends FragmentActivity
 		
 		ControlFragment navFragment = (ControlFragment) getFragmentManager().findFragmentByTag("nav");
 		if(navFragment != null){
-			navFragment.setOriginFromMapUI( pt );
+			navFragment.orig.setFromMap( pt );
 		}
 		MapFragment mapFrag = (MapFragment) getFragmentManager().findFragmentByTag("map");
 		if(mapFrag!=null){
@@ -205,7 +205,7 @@ public class MainActivity extends FragmentActivity
 		}
 		ControlFragment navFrag = (ControlFragment) getFragmentManager().findFragmentByTag("nav");
 		if(navFrag!=null){
-			navFrag.clearOriginUI();
+			navFrag.orig.clear();
 		}
 	}
 
@@ -239,6 +239,20 @@ public class MainActivity extends FragmentActivity
 			return null;
 		}
 		return new GeoPoint( bestLocation.getLatitude(), bestLocation.getLongitude() );
+	}
+
+	public void startGetRoute() {
+		ControlFragment navFrag = (ControlFragment) getFragmentManager().findFragmentByTag("nav");
+		if(navFrag!=null){
+			navFrag.startGetRoute();
+		}
+	}
+
+	public void finishGetRoute() {
+		ControlFragment navFrag = (ControlFragment) getFragmentManager().findFragmentByTag("nav");
+		if(navFrag!=null){
+			navFrag.finishGetRoute();
+		}
 	}
 
 

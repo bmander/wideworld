@@ -109,105 +109,187 @@ public class ControlFragment extends Fragment {
 	
 	static class GeocodeResponseHandler extends Handler {
 		
-		private ListView dropdown;
-		private ProgressBar working;
+		private LocationPicker locPicker;
 		
-		GeocodeResponseHandler(ListView orig_dropdown, ProgressBar working){
+		GeocodeResponseHandler(LocationPicker locPicker){
 			super();
 			
-			this.dropdown = orig_dropdown;
-			this.working = working;
+			this.locPicker = locPicker;
 		}
 		
 		@Override
-	    public void handleMessage(Message msg) {
-	    	Log.v("DEBUG", "message caught");
-	    	
-	    	working.setVisibility(View.GONE);
+	    public void handleMessage(Message msg) {	    	
+	    	locPicker.working.setVisibility(View.GONE);
 	    	
 	    	if( msg.arg1 == GEOCODE_FAIL ){
-				dropdown.setVisibility(View.GONE);
+				locPicker.dropdown.setVisibility(View.GONE);
 	    	} else {
 		    	List<Address> geocodeResults = (List<Address>)msg.obj;
 		    	
 		    	AddressAdapter adapt = new AddressAdapter( geocodeResults );
-		    	dropdown.setAdapter( adapt );
+		    	locPicker.dropdown.setAdapter( adapt );
 	    	}
 		    	
-			dropdown.setVisibility(View.VISIBLE);
+			locPicker.dropdown.setVisibility(View.VISIBLE);
 			
 	    }
 	}
 	
+	class LocationPicker {
+		MainActivity root;
+		ProgressBar working;
+		ListView dropdown;
+		EditText text;
+		Button button;
+		
+		LocationPicker( final MainActivity root, final ProgressBar working, final ListView dropdown, EditText text, Button button ){
+			this.root = root;
+			this.working = working;
+			this.dropdown = dropdown;
+			this.text = text;
+			this.button = button;
+			
+			if( root.orig_state == MainActivity.TERMINUS_BLANK){
+				clear();
+			} else if( root.orig_state == MainActivity.TERMINUS_MAP ){
+				setFromMap( root.getOrigin() );
+			}
+			
+			this.dropdown.setOnItemClickListener( new OnItemClickListener() {
+
+				@Override
+				public void onItemClick(AdapterView<?> parent, View view, int position,
+						long id) {
+					root.orig_state = MainActivity.TERMINUS_ADDRESS;
+					AddressAdapter data = (AddressAdapter)parent.getAdapter();
+					Address selected = data.getItem(position);
+					
+					root.setOriginFromAddress( selected );
+				}
+				
+			});
+			
+			this.button.setOnClickListener( new OnClickListener() {
+
+				@Override
+				public void onClick(View arg0) {
+					if(root.orig_state == MainActivity.TERMINUS_BLANK){
+						((MainActivity)getActivity()).setOriginFromMyLocation();
+					} else {
+						((MainActivity)getActivity()).clearOrigin();
+					} 
+				}
+
+			});
+
+			this.text.addTextChangedListener( new TextWatcher() {
+
+				@Override
+				public void afterTextChanged(Editable arg0) {
+					// TODO Auto-generated method stub
+
+				}
+
+				@Override
+				public void beforeTextChanged(CharSequence arg0, int arg1,
+						int arg2, int arg3) {
+					// TODO Auto-generated method stub
+
+				}
+
+				@Override
+				public void onTextChanged(CharSequence arg0, int arg1, int arg2,
+						int arg3) {
+
+					if( root.orig_state != MainActivity.TERMINUS_BLANK ){
+						return;
+					}
+
+					if( arg0.length()<2 ){
+						working.setVisibility(View.GONE);
+						dropdown.setVisibility(View.GONE);
+						if( getAddressTask != null ) {
+							getAddressTask.cancel(true);
+						}
+						return;
+					}
+
+					if( getAddressTask != null ){
+						getAddressTask.cancel(true);
+					}
+
+					working.setVisibility(View.VISIBLE);
+					getAddressTask = new GetAddressTask(geocodeResponseHandler, geocoder);
+					getAddressTask.execute( arg0.toString() );
+
+				}
+
+			});
+		}
+		
+		void clear(){
+			button.setText("GPS");
+			text.setEnabled(true);
+			text.setText("");
+		}
+		
+		void setFromMyLocation() {
+			button.setText("X");
+			text.setEnabled(false);
+			text.setText("My Location");
+		}
+		
+		void setFromMap(GeoPoint pt) {
+			working.setVisibility(View.GONE);
+			dropdown.setVisibility(View.GONE);
+			button.setText("X");
+			text.setText("FROM MAP");
+			text.setEnabled(false);
+		}
+		
+		void setFromAddress( Address address ) {
+			text.setEnabled(false);
+			text.setText( address.getAddressLine(0) );
+			dropdown.setVisibility(View.GONE);
+			button.setText("X");
+		}
+	}
+
 	Geocoder geocoder;
 	static GeocodeResponseHandler geocodeResponseHandler;
 	GetAddressTask getAddressTask = null;
-	
-	ProgressBar orig_working;
-	ListView orig_dropdown;
-	EditText orig_text;
-	Button orig_button;
-	
-	ProgressBar dest_working;
-	ListView dest_dropdown;
-	EditText dest_text;
-	Button dest_button;
-	
+
+	LocationPicker orig;
+	LocationPicker dest;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate( savedInstanceState );
 		Log.v("DEBUG", "create control" );
 	}
-	
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		
+
 		Log.v("DEBUG", "create control view");
-		
+
 		final MainActivity activity = (MainActivity)this.getActivity();
-		
+
 		final View fragView = inflater.inflate(R.layout.control_fragment, container, false);
 		
-		orig_working = (ProgressBar)fragView.findViewById(R.id.orig_working);
-		dest_working = (ProgressBar)fragView.findViewById(R.id.dest_working);
-		orig_text = (EditText)fragView.findViewById(R.id.orig_text);
-		orig_button = (Button)fragView.findViewById(R.id.orig_button);
+		ProgressBar o_working = (ProgressBar)fragView.findViewById(R.id.orig_working);
+		EditText o_text = (EditText)fragView.findViewById(R.id.orig_text);
+		Button o_button = (Button)fragView.findViewById(R.id.orig_button);
+		ListView o_dropdown = (ListView)fragView.findViewById( R.id.orig_dropdown );
+		orig = new LocationPicker( activity, o_working, o_dropdown, o_text, o_button );
 		
-		orig_dropdown = (ListView)fragView.findViewById( R.id.orig_dropdown );
-		orig_dropdown.setOnItemClickListener( new OnItemClickListener() {
-
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position,
-					long id) {
-				activity.orig_state = MainActivity.TERMINUS_ADDRESS;
-				AddressAdapter data = (AddressAdapter)parent.getAdapter();
-				Address selected = data.getItem(position);
-				
-				activity.setOriginFromAddress( selected );
-			}
-			
-		});
+		ProgressBar d_working = (ProgressBar)fragView.findViewById(R.id.dest_working);
+		EditText d_text = (EditText)fragView.findViewById(R.id.dest_text);
+		Button d_button = (Button)fragView.findViewById(R.id.dest_button);
+		ListView d_dropdown = (ListView)fragView.findViewById( R.id.dest_dropdown );
+		dest = new LocationPicker( activity, d_working, d_dropdown, d_text, d_button );
 		
-		if( activity.orig_state == MainActivity.TERMINUS_BLANK){
-			clearOriginUI();
-		} else if( activity.orig_state == MainActivity.TERMINUS_MAP ){
-			setOriginFromMapUI( activity.getOrigin() );
-		}
-		
-		orig_button.setOnClickListener( new OnClickListener() {
-
-			@Override
-			public void onClick(View arg0) {
-				if(activity.orig_state == MainActivity.TERMINUS_BLANK){
-					((MainActivity)getActivity()).setOriginFromMyLocation();
-				} else {
-					((MainActivity)getActivity()).clearOrigin();
-				} 
-			}
-			
-		});
-		
-		geocodeResponseHandler = new GeocodeResponseHandler(orig_dropdown, orig_working);
+		geocodeResponseHandler = new GeocodeResponseHandler(orig);
 		
 		geocoder = new Geocoder(fragView.getContext());
 
@@ -220,50 +302,6 @@ public class ControlFragment extends Fragment {
              R.array.speeds_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
-
-        orig_text.addTextChangedListener( new TextWatcher() {
-
-			@Override
-			public void afterTextChanged(Editable arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			@Override
-			public void beforeTextChanged(CharSequence arg0, int arg1,
-					int arg2, int arg3) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			@Override
-			public void onTextChanged(CharSequence arg0, int arg1, int arg2,
-					int arg3) {
-				
-				if( activity.orig_state != MainActivity.TERMINUS_BLANK ){
-					return;
-				}
-								
-				if( arg0.length()<2 ){
-					orig_working.setVisibility(View.GONE);
-					orig_dropdown.setVisibility(View.GONE);
-					if( getAddressTask != null ) {
-						getAddressTask.cancel(true);
-					}
-					return;
-				}
-				
-				if( getAddressTask != null ){
-					getAddressTask.cancel(true);
-				}
-				
-				orig_working.setVisibility(View.VISIBLE);
-				getAddressTask = new GetAddressTask(geocodeResponseHandler, geocoder);
-				getAddressTask.execute( arg0.toString() );
-
-			}
-        	
-        });
         
         Button go_button = (Button)fragView.findViewById(R.id.go_button);
         go_button.setOnClickListener(new OnClickListener(){
@@ -277,46 +315,19 @@ public class ControlFragment extends Fragment {
 		
 		return fragView;
 	}
-	
-	protected void clearOriginUI(){
-		orig_button.setText("GPS");
-		orig_text.setEnabled(true);
-		orig_text.setText("");
+
+	public void startGetRoute() {
+		((Button)getView().findViewById(R.id.go_button)).setText("...");
 	}
 
-	protected void setOriginFromMyLocationUI() {
-		orig_button.setText("X");
-		orig_text.setEnabled(false);
-		orig_text.setText("My Location");
-	}
-
-	public void setOriginFromMapUI(GeoPoint pt) {
-		Log.v("DEBUG", "updating origin UI");
-		orig_working.setVisibility(View.GONE);
-		orig_dropdown.setVisibility(View.GONE);
-		orig_button.setText("X");
-		orig_text.setText("FROM MAP");
-		orig_text.setEnabled(false);
+	public void finishGetRoute() {
+		((Button)getView().findViewById(R.id.go_button)).setText("go!");
 	}
 	
-	public void setOriginFromAddressUI( Address address ) {
-		orig_text.setEnabled(false);
-		orig_text.setText( address.getAddressLine(0) );
-		orig_dropdown.setVisibility(View.GONE);
-		orig_button.setText("X");
-	}
-
-	public void setDestinationFromMap(GeoPoint pt) {
-		Log.v("DEBUG", "updating destination UI");
-//		dest_working.setVisibility(View.GONE);
-//		dest_dropdown.setVisibility(View.GONE);
-//		dest_button.setText("X");
-//		dest_text.setText("FROM MAP");
-//		dest_text.setEnabled(false);
-	}
 
 
-	
+
+
 
 
 }

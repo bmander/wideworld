@@ -50,23 +50,6 @@
         android:layout_alignRight="@+id/dest_text"
         android:visibility="gone" />
 
-    <Spinner
-        android:id="@+id/speed_spinner"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/go_button"
-        android:layout_marginTop="22dp" />
-
-    <Button
-        android:id="@+id/go_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/checkbox_usetransit"
-        android:layout_marginTop="19dp"
-        android:text="@string/go_text" />
-
     <CheckBox
         android:id="@+id/checkbox_usetransit"
         android:layout_width="wrap_content"
@@ -114,13 +97,20 @@
         android:layout_alignParentRight="true"
         android:layout_alignTop="@+id/dest_text" />
 
-    <ImageView
-        android:layout_width="300dp"
-        android:layout_height="300dp"
+    <Spinner
+        android:id="@+id/speed_spinner"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/checkbox_usetransit"
+        android:layout_marginTop="20dp" />
+
+    <Button
+        android:id="@+id/go_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
         android:layout_below="@+id/speed_spinner"
-        android:layout_marginTop="42dp"
-        android:layout_toRightOf="@+id/go_button"
-        android:contentDescription="test"
-        android:src="@drawable/start_icon" />
+        android:text="@string/go_text" />
 
 </RelativeLayout>

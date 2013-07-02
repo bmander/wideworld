@@ -69,12 +69,14 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
     private Overlay origOverlay=null;
     private Overlay destOverlay=null;
     private MyLocationOverlay locOverlay = null;
+    private static MainActivity top;
     
 
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        top = (MainActivity)getActivity();
     }
 
     @Override
@@ -239,15 +241,15 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 		}
 		
 		// get the orig and dest points
-		double lat1, lng1;
 		GeoPoint orig = context.getOrigin();
-		lat1 = orig.getLatitudeE6()/1E6;
-		lng1 = orig.getLongitudeE6()/1E6;
+		double lat1 = orig.getLatitudeE6()/1E6;
+		double lng1 = orig.getLongitudeE6()/1E6;
 		GeoPoint dest = context.getDestination();
 		double lat2 = dest.getLatitudeE6()/1E6;
 		double lng2 = dest.getLongitudeE6()/1E6;
 				
 		Log.v("DEBUG", "start get route...");
+		((MainActivity)getActivity()).startGetRoute();
 		context.routeServer.getRoute(context.routeServer.new Request(lat1, lng1, lat2, lng2, useTransit, 4.5), new RouteServer.FetchRouteCallback(){
 			public void onResponse(RouteServer.Response resp){
 				// remove all the old paths from the map
@@ -322,6 +324,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 					e.printStackTrace();
 				}
 				Log.v("DEBUG", "finish get route.");
+				
 			}
 		});
 		
@@ -333,6 +336,8 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         	
 			Toast toast = Toast.makeText((Context)msg.obj, "total time: "+(msg.arg2-msg.arg1)/60+"m", Toast.LENGTH_SHORT);
 			toast.show();
+			
+			top.finishGetRoute();
 			
             mMapView.invalidate();
         }
@@ -374,7 +379,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         		public void onClick(DialogInterface dialog, int id){
 //        			top.orig = pt;
 //        			findAndDisplayRoute();
-        			setOriginIcon( pt );
+        			//setOriginIcon( pt );
         			top.setOriginFromMap( pt );
         		}
         	});
