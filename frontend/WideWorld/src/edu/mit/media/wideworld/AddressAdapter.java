@@ -16,8 +16,15 @@ class AddressAdapter extends BaseAdapter {
 		this.addresses = addresses;
 	}
 
+	public AddressAdapter() {
+		this.addresses = null;
+	}
+
 	@Override
 	public int getCount() {
+		if( this.addresses == null ){
+			return 0;
+		}
 		return addresses.size();
 	}
 
@@ -38,6 +45,10 @@ class AddressAdapter extends BaseAdapter {
 		Address address = addresses.get(pos);
 		foo.setText( address.getAddressLine(0) + ", " + address.getAddressLine(1) );
 		return foo;
+	}
+
+	public void setAddresses(List<Address> addresses) {
+		this.addresses = addresses;
 	}
 	
 }

@@ -8,6 +8,7 @@ import org.osmdroid.util.GeoPoint;
 
 import android.annotation.TargetApi;
 import android.app.Fragment;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.AsyncTask;
@@ -23,6 +24,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.HeaderViewListAdapter;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -31,6 +33,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
@@ -111,15 +114,16 @@ public class ControlFragment extends Fragment {
 	    	locPicker.working.setVisibility(View.GONE);
 	    	
 	    	if( msg.arg1 == GEOCODE_FAIL ){
-				locPicker.dropdown.setVisibility(View.GONE);
+				locPicker.text.setBackgroundColor( Color.RED );
 	    	} else {
 		    	List<Address> geocodeResults = (List<Address>)msg.obj;
 		    	
-		    	AddressAdapter adapt = new AddressAdapter( geocodeResults );
-		    	locPicker.dropdown.setAdapter( adapt );
+		    	HeaderViewListAdapter dropdownContents = (HeaderViewListAdapter) locPicker.dropdown.getAdapter();
+		    	((AddressAdapter)dropdownContents.getWrappedAdapter()).setAddresses( geocodeResults );
 	    	}
 		    	
-			locPicker.dropdown.setVisibility(View.VISIBLE);
+	    	locPicker.showDropdown();
+			
 			
 	    }
 	}
@@ -131,13 +135,22 @@ public class ControlFragment extends Fragment {
 		ListView dropdown;
 		EditText text;
 		Button button;
+		TextView dropdown_header;
 		
 		LocationPicker( final MainActivity.TerminusManager terminus, final ProgressBar working, final ListView dropdown, EditText text, Button button ){
 			this.terminus = terminus;
 			this.working = working;
 			this.dropdown = dropdown;
+			
 			this.text = text;
 			this.button = button;
+			
+			this.dropdown_header = (TextView) getActivity().getLayoutInflater().inflate( R.layout.locpicker_item, this.dropdown, false );
+			this.dropdown.addHeaderView( this.dropdown_header, null, false );
+			this.dropdown.setAdapter( new AddressAdapter() );
+			
+			//this.dropdown_header = final View fragView = inflater.inflate(R.layout.control_fragment, container, false);
+
 			
 			if( terminus.type == MainActivity.TerminusManager.BLANK){
 				clear();
@@ -150,8 +163,12 @@ public class ControlFragment extends Fragment {
 				@Override
 				public void onItemClick(AdapterView<?> parent, View view, int position,
 						long id) {
-					AddressAdapter data = (AddressAdapter)parent.getAdapter();
-					Address selected = data.getItem(position);
+					HeaderViewListAdapter headerlist = (HeaderViewListAdapter)parent.getAdapter();
+					AddressAdapter data = (AddressAdapter) headerlist.getWrappedAdapter();
+					
+					// The index of the item in the wrapped list is the index of the item in the
+					// ListView minus the number of headers
+					Address selected = data.getItem(position-headerlist.getHeadersCount());
 					
 					terminus.setFromAddress( selected );
 				}
@@ -206,6 +223,13 @@ public class ControlFragment extends Fragment {
 
 					// Set the working spinner, and start a geocode task
 					working.setVisibility(View.VISIBLE);
+					showDropdownHeader("looking for the address now...");
+//			    	ArrayAdapter<String> adapt = new ArrayAdapter<String>(getActivity(), R.layout.locpicker_item);
+//			    	adapt.add("foo");
+//			    	adapt.add("bar");
+//			    	dropdown.setAdapter( adapt );
+					showDropdown();
+					
 					GeocodeResponseHandler hh = new GeocodeResponseHandler(superthis);
 					getAddressTask = new GetAddressTask(hh, geocoder);
 					getAddressTask.execute( s.toString() );
@@ -215,6 +239,22 @@ public class ControlFragment extends Fragment {
 			});
 		}
 		
+		protected void showDropdownHeader(String string) {
+			if(dropdown.getHeaderViewsCount()==0){
+				dropdown.addHeaderView( dropdown_header, null, false );
+				dropdown_header.setText(string);
+			}
+		}
+
+		public void showDropdown() {
+			dropdown.setVisibility(View.VISIBLE);
+			dropdown.bringToFront();
+		}
+		
+		private void hideDropdown() {
+			dropdown.setVisibility(View.GONE);
+		}
+
 		void clear(){
 			button.setText("GPS");
 			text.setEnabled(true);
@@ -229,22 +269,22 @@ public class ControlFragment extends Fragment {
 		
 		void setFromMap(GeoPoint pt) {
 			working.setVisibility(View.GONE);
-			dropdown.setVisibility(View.GONE);
+			hideDropdown();
 			button.setText("X");
 			text.setText("FROM MAP");
 			text.setEnabled(false);
 		}
-		
+
 		void setFromAddress( Address address ) {
 			text.setEnabled(false);
 			text.setText( address.getAddressLine(0) );
-			dropdown.setVisibility(View.GONE);
+			hideDropdown();
 			button.setText("X");
 		}
 
 		private void cancelGeocoding() {
 			working.setVisibility(View.GONE);
-			dropdown.setVisibility(View.GONE);
+			hideDropdown();
 			if( getAddressTask != null ) {
 				getAddressTask.cancel(true);
 			}
