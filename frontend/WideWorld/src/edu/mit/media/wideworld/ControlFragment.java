@@ -115,11 +115,18 @@ public class ControlFragment extends Fragment {
 	    	
 	    	if( msg.arg1 == GEOCODE_FAIL ){
 				locPicker.text.setBackgroundColor( Color.RED );
+				locPicker.dropdown_header.setText("something went wrong");
 	    	} else {
 		    	List<Address> geocodeResults = (List<Address>)msg.obj;
 		    	
-		    	HeaderViewListAdapter dropdownContents = (HeaderViewListAdapter) locPicker.dropdown.getAdapter();
-		    	((AddressAdapter)dropdownContents.getWrappedAdapter()).setAddresses( geocodeResults );
+		    	if( geocodeResults.size()<1 ){
+		    		locPicker.dropdown_header.setText("no results found");
+		    		locPicker.text.setBackgroundColor( Color.RED );
+		    	} else {
+		    		locPicker.dropdown.removeHeaderView( locPicker.dropdown_header );
+			    	HeaderViewListAdapter dropdownContents = (HeaderViewListAdapter) locPicker.dropdown.getAdapter();
+			    	((AddressAdapter)dropdownContents.getWrappedAdapter()).setAddresses( geocodeResults );
+		    	}
 	    	}
 		    	
 	    	locPicker.showDropdown();
@@ -223,11 +230,9 @@ public class ControlFragment extends Fragment {
 
 					// Set the working spinner, and start a geocode task
 					working.setVisibility(View.VISIBLE);
-					showDropdownHeader("looking for the address now...");
-//			    	ArrayAdapter<String> adapt = new ArrayAdapter<String>(getActivity(), R.layout.locpicker_item);
-//			    	adapt.add("foo");
-//			    	adapt.add("bar");
-//			    	dropdown.setAdapter( adapt );
+					showDropdownHeader();
+					dropdown_header.setText("Locating address...");
+					clearDropdown();
 					showDropdown();
 					
 					GeocodeResponseHandler hh = new GeocodeResponseHandler(superthis);
@@ -239,10 +244,9 @@ public class ControlFragment extends Fragment {
 			});
 		}
 		
-		protected void showDropdownHeader(String string) {
+		protected void showDropdownHeader() {
 			if(dropdown.getHeaderViewsCount()==0){
 				dropdown.addHeaderView( dropdown_header, null, false );
-				dropdown_header.setText(string);
 			}
 		}
 
@@ -253,6 +257,10 @@ public class ControlFragment extends Fragment {
 		
 		private void hideDropdown() {
 			dropdown.setVisibility(View.GONE);
+		}
+		
+		private void clearDropdown() {
+			((AddressAdapter)((HeaderViewListAdapter)dropdown.getAdapter()).getWrappedAdapter()).clear();
 		}
 
 		void clear(){
