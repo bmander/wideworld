@@ -125,6 +125,7 @@ public class ControlFragment extends Fragment {
 	}
 	
 	class LocationPicker {
+		protected static final int MIN_GEOCODE_STRING_SIZE = 2;
 		MainActivity.TerminusManager terminus;
 		ProgressBar working;
 		ListView dropdown;
@@ -184,30 +185,30 @@ public class ControlFragment extends Fragment {
 				}
 
 				@Override
-				public void onTextChanged(CharSequence arg0, int arg1, int arg2,
-						int arg3) {
+				public void onTextChanged(CharSequence s, int start, int before,
+						int count) {
 
+					// Check we want to look up address
 					if( terminus.type != MainActivity.TerminusManager.BLANK ){
 						return;
 					}
 
-					if( arg0.length()<2 ){
-						working.setVisibility(View.GONE);
-						dropdown.setVisibility(View.GONE);
-						if( getAddressTask != null ) {
-							getAddressTask.cancel(true);
-						}
+					// If the string is too short, cancel geocoding
+					if( s.length()<MIN_GEOCODE_STRING_SIZE ){
+						cancelGeocoding();
 						return;
 					}
 
+					// If a geocode task is underway, cancel it
 					if( getAddressTask != null ){
 						getAddressTask.cancel(true);
 					}
 
+					// Set the working spinner, and start a geocode task
 					working.setVisibility(View.VISIBLE);
 					GeocodeResponseHandler hh = new GeocodeResponseHandler(superthis);
 					getAddressTask = new GetAddressTask(hh, geocoder);
-					getAddressTask.execute( arg0.toString() );
+					getAddressTask.execute( s.toString() );
 
 				}
 
@@ -239,6 +240,14 @@ public class ControlFragment extends Fragment {
 			text.setText( address.getAddressLine(0) );
 			dropdown.setVisibility(View.GONE);
 			button.setText("X");
+		}
+
+		private void cancelGeocoding() {
+			working.setVisibility(View.GONE);
+			dropdown.setVisibility(View.GONE);
+			if( getAddressTask != null ) {
+				getAddressTask.cancel(true);
+			}
 		}
 	}
 

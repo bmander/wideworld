@@ -66,7 +66,7 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/orig_text"
         android:layout_below="@+id/orig_text"
-        android:background="#ffffff"
+        android:background="#ffffffff"
         android:visibility="gone" >
     </ListView>
     
@@ -77,7 +77,7 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/dest_text"
         android:layout_below="@+id/dest_text"
-        android:background="#ffffff"
+        android:background="#ffffffff"
         android:visibility="gone" >
     </ListView>
 
