@@ -25,6 +25,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.HeaderViewListAdapter;
 import android.widget.AdapterView.OnItemClickListener;
@@ -32,6 +33,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
@@ -119,11 +121,11 @@ public class ControlFragment extends Fragment {
 	    		locPicker.setErrorState();
 				if( locPicker.retryCount < MAX_RETRY ){
 					locPicker.retryCount += 1;
-					locPicker.dropdown_header.setText("Server error. Retrying "+locPicker.retryCount+"/"+MAX_RETRY+"...");
+					locPicker.dropdown_header_text.setText("Server error. Retrying "+locPicker.retryCount+"/"+MAX_RETRY+"...");
 					locPicker.geocode();
 				} else {
 					locPicker.working.setVisibility(View.GONE);
-					locPicker.dropdown_header.setText("Server error. Couldn't cope.");
+					locPicker.dropdown_header_text.setText("Server error. Couldn't cope.");
 				}
 	    	} else {
 	    		locPicker.working.setVisibility(View.GONE);
@@ -131,10 +133,10 @@ public class ControlFragment extends Fragment {
 		    	locPicker.clearErrorState();
 		    	
 		    	if( geocodeResults.size()<1 ){
-		    		locPicker.dropdown_header.setText("no results found");
+		    		locPicker.dropdown_header_text.setText("no results found");
 		    		locPicker.text.setBackgroundColor( Color.RED );
 		    	} else {
-		    		locPicker.dropdown.removeHeaderView( locPicker.dropdown_header );
+		    		locPicker.dropdown.removeHeaderView( locPicker.dropdown_header_view );
 			    	HeaderViewListAdapter dropdownContents = (HeaderViewListAdapter) locPicker.dropdown.getAdapter();
 			    	((AddressAdapter)dropdownContents.getWrappedAdapter()).setAddresses( geocodeResults );
 		    	}
@@ -154,7 +156,8 @@ public class ControlFragment extends Fragment {
 		ListView dropdown;
 		EditText text;
 		Button button;
-		TextView dropdown_header;
+		LinearLayout dropdown_header_view;
+		TextView dropdown_header_text;
 		GeocodeResponseHandler hh;
 		
 		Drawable nonerror_text_background;
@@ -169,8 +172,9 @@ public class ControlFragment extends Fragment {
 			this.text = text;
 			this.button = button;
 			
-			this.dropdown_header = (TextView) getActivity().getLayoutInflater().inflate( R.layout.locpicker_item, this.dropdown, false );
-			this.dropdown.addHeaderView( this.dropdown_header, null, false );
+			this.dropdown_header_view = (LinearLayout) getActivity().getLayoutInflater().inflate( R.layout.locpicker_header, this.dropdown, false );
+			this.dropdown_header_text = (TextView) dropdown_header_view.findViewById(R.id.header_text);
+			this.dropdown.addHeaderView( this.dropdown_header_view, null, false );
 			this.dropdown.setAdapter( new AddressAdapter() );
 			
 			this.hh = new GeocodeResponseHandler(this);
@@ -245,7 +249,7 @@ public class ControlFragment extends Fragment {
 					// Set the working spinner, and start a geocode task
 					working.setVisibility(View.VISIBLE);
 					showDropdownHeader();
-					dropdown_header.setText("Locating address...");
+					dropdown_header_text.setText("Locating address...");
 					clearDropdown();
 					showDropdown();
 					
@@ -281,7 +285,7 @@ public class ControlFragment extends Fragment {
 
 		protected void showDropdownHeader() {
 			if(dropdown.getHeaderViewsCount()==0){
-				dropdown.addHeaderView( dropdown_header, null, false );
+				dropdown.addHeaderView( dropdown_header_view, null, false );
 			}
 		}
 
