@@ -88,6 +88,13 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         	}
         }
         
+        if( top.orig.pt != null ){
+        	this.setOriginIcon( top.orig.pt );
+        }
+        if( top.dest.pt != null ){
+        	this.setDestinationIcon( top.dest.pt );
+        }
+        
         return mMapView;
     }
 

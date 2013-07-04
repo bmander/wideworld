@@ -6,9 +6,11 @@ import java.util.List;
 
 import org.osmdroid.util.GeoPoint;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.AsyncTask;
@@ -39,6 +41,7 @@ import android.widget.TextView;
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class ControlFragment extends Fragment {
 	
+	public static final int MAX_RETRY = 4;
 	static int GEOCODE_FAIL = 1;
 	static int GEOCODE_SUCCESS = 2;
 
@@ -111,13 +114,21 @@ public class ControlFragment extends Fragment {
 		@SuppressWarnings("unchecked")
 		@Override
 	    public void handleMessage(Message msg) {	    	
-	    	locPicker.working.setVisibility(View.GONE);
 	    	
 	    	if( msg.arg1 == GEOCODE_FAIL ){
-				locPicker.text.setBackgroundColor( Color.RED );
-				locPicker.dropdown_header.setText("something went wrong");
+	    		locPicker.setErrorState();
+				if( locPicker.retryCount < MAX_RETRY ){
+					locPicker.retryCount += 1;
+					locPicker.dropdown_header.setText("Server error. Retrying "+locPicker.retryCount+"/"+MAX_RETRY+"...");
+					locPicker.geocode();
+				} else {
+					locPicker.working.setVisibility(View.GONE);
+					locPicker.dropdown_header.setText("Server error. Couldn't cope.");
+				}
 	    	} else {
+	    		locPicker.working.setVisibility(View.GONE);
 		    	List<Address> geocodeResults = (List<Address>)msg.obj;
+		    	locPicker.clearErrorState();
 		    	
 		    	if( geocodeResults.size()<1 ){
 		    		locPicker.dropdown_header.setText("no results found");
@@ -136,6 +147,7 @@ public class ControlFragment extends Fragment {
 	}
 	
 	class LocationPicker {
+		public int retryCount;
 		protected static final int MIN_GEOCODE_STRING_SIZE = 2;
 		MainActivity.TerminusManager terminus;
 		ProgressBar working;
@@ -143,8 +155,13 @@ public class ControlFragment extends Fragment {
 		EditText text;
 		Button button;
 		TextView dropdown_header;
+		GeocodeResponseHandler hh;
+		
+		Drawable nonerror_text_background;
 		
 		LocationPicker( final MainActivity.TerminusManager terminus, final ProgressBar working, final ListView dropdown, EditText text, Button button ){
+			this.retryCount = 0;
+			
 			this.terminus = terminus;
 			this.working = working;
 			this.dropdown = dropdown;
@@ -156,8 +173,9 @@ public class ControlFragment extends Fragment {
 			this.dropdown.addHeaderView( this.dropdown_header, null, false );
 			this.dropdown.setAdapter( new AddressAdapter() );
 			
-			//this.dropdown_header = final View fragView = inflater.inflate(R.layout.control_fragment, container, false);
-
+			this.hh = new GeocodeResponseHandler(this);
+			
+			nonerror_text_background = this.text.getBackground();
 			
 			if( terminus.type == MainActivity.TerminusManager.BLANK){
 				clear();
@@ -195,7 +213,6 @@ public class ControlFragment extends Fragment {
 
 			});
 
-			final LocationPicker superthis = this;
 			this.text.addTextChangedListener( new TextWatcher() {
 
 				@Override
@@ -211,8 +228,10 @@ public class ControlFragment extends Fragment {
 				@Override
 				public void onTextChanged(CharSequence s, int start, int before,
 						int count) {
+					
+					clearErrorState();
 
-					// Check we want to look up address
+					// only look up address when the field is in a blank state
 					if( terminus.type != MainActivity.TerminusManager.BLANK ){
 						return;
 					}
@@ -223,11 +242,6 @@ public class ControlFragment extends Fragment {
 						return;
 					}
 
-					// If a geocode task is underway, cancel it
-					if( getAddressTask != null ){
-						getAddressTask.cancel(true);
-					}
-
 					// Set the working spinner, and start a geocode task
 					working.setVisibility(View.VISIBLE);
 					showDropdownHeader();
@@ -235,15 +249,36 @@ public class ControlFragment extends Fragment {
 					clearDropdown();
 					showDropdown();
 					
-					GeocodeResponseHandler hh = new GeocodeResponseHandler(superthis);
-					getAddressTask = new GetAddressTask(hh, geocoder);
-					getAddressTask.execute( s.toString() );
+					retryCount=0;
+					geocode();
 
 				}
 
 			});
 		}
 		
+		public void setErrorState() {
+			text.setBackgroundColor( Color.RED );
+		}
+		
+		@SuppressLint("NewApi")
+		public void clearErrorState() {
+			if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN){
+				text.setBackground(nonerror_text_background);
+			} else {
+				text.setBackgroundColor( Color.WHITE );
+			}
+		}
+
+		public void geocode() {
+			// If a geocode task is underway, cancel it
+			if( getAddressTask != null ){
+				getAddressTask.cancel(true);
+			}
+			getAddressTask = new GetAddressTask(hh, geocoder);
+			getAddressTask.execute( text.getText().toString() );
+		}
+
 		protected void showDropdownHeader() {
 			if(dropdown.getHeaderViewsCount()==0){
 				dropdown.addHeaderView( dropdown_header, null, false );
