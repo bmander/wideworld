@@ -25,7 +25,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.HeaderViewListAdapter;
 import android.widget.AdapterView.OnItemClickListener;
@@ -125,6 +124,7 @@ public class ControlFragment extends Fragment {
 					locPicker.geocode();
 				} else {
 					locPicker.working.setVisibility(View.GONE);
+					locPicker.dropdown_header_working.setVisibility(View.GONE);
 					locPicker.dropdown_header_text.setText("Server error. Couldn't cope.");
 				}
 	    	} else {
@@ -134,6 +134,7 @@ public class ControlFragment extends Fragment {
 		    	
 		    	if( geocodeResults.size()<1 ){
 		    		locPicker.dropdown_header_text.setText("no results found");
+		    		locPicker.dropdown_header_working.setVisibility(View.GONE);
 		    		locPicker.text.setBackgroundColor( Color.RED );
 		    	} else {
 		    		locPicker.dropdown.removeHeaderView( locPicker.dropdown_header_view );
@@ -158,6 +159,7 @@ public class ControlFragment extends Fragment {
 		Button button;
 		LinearLayout dropdown_header_view;
 		TextView dropdown_header_text;
+		ProgressBar dropdown_header_working;
 		GeocodeResponseHandler hh;
 		
 		Drawable nonerror_text_background;
@@ -174,6 +176,7 @@ public class ControlFragment extends Fragment {
 			
 			this.dropdown_header_view = (LinearLayout) getActivity().getLayoutInflater().inflate( R.layout.locpicker_header, this.dropdown, false );
 			this.dropdown_header_text = (TextView) dropdown_header_view.findViewById(R.id.header_text);
+			this.dropdown_header_working = (ProgressBar) dropdown_header_view.findViewById(R.id.header_working);
 			this.dropdown.addHeaderView( this.dropdown_header_view, null, false );
 			this.dropdown.setAdapter( new AddressAdapter() );
 			
@@ -247,7 +250,7 @@ public class ControlFragment extends Fragment {
 					}
 
 					// Set the working spinner, and start a geocode task
-					working.setVisibility(View.VISIBLE);
+					dropdown_header_working.setVisibility(View.VISIBLE);
 					showDropdownHeader();
 					dropdown_header_text.setText("Locating address...");
 					clearDropdown();
