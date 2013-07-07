@@ -35,6 +35,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -43,6 +44,7 @@ import android.widget.TextView;
 public class ControlFragment extends Fragment {
 	
 	public static final int MAX_RETRY = 4;
+	public static final int MAX_GEOCODED_LOCATIONS = 8;
 	static int GEOCODE_FAIL = 1;
 	static int GEOCODE_SUCCESS = 2;
 
@@ -57,6 +59,21 @@ public class ControlFragment extends Fragment {
 			this.geocoder = geocoder;
 		}
 		
+		List<Address> geocodeWithinArea(String loc, int maxResults, double bottom, double left, double top, double right ) throws IOException {
+			List<Address> prefilter = geocoder.getFromLocationName(loc, maxResults, bottom, left, top, right);
+
+			List<Address> postfilter = new ArrayList<Address>();
+			for( int i=0; i<prefilter.size(); i++){
+				Address aa = prefilter.get(i);
+				double lat = aa.getLatitude();
+				double lon = aa.getLongitude();
+				if(lat>bottom && lat<top && lon>left && lon<right){
+					postfilter.add( aa );
+				}
+			}
+			return postfilter;
+		}
+		
 		@Override
 		protected Void doInBackground(String... arg0) {
 			try {
@@ -68,7 +85,7 @@ public class ControlFragment extends Fragment {
 				
 				String locString = arg0[0];
 				Log.v("DEBUG", "geocode this: "+locString);
-				List<Address> addresses = geocoder.getFromLocationName(locString, 5, 42.184267, -71.249771, 42.449301, 70.888595);
+				List<Address> addresses = geocodeWithinArea(locString, MAX_GEOCODED_LOCATIONS, 42.184267, -71.249771, 42.449301, 70.888595);
 			
 				List<String> resp = new ArrayList<String>();
 				for(int i=0; i<addresses.size(); i++){
@@ -157,6 +174,9 @@ public class ControlFragment extends Fragment {
 		ListView dropdown;
 		EditText text;
 		Button button;
+		RelativeLayout lozenge;
+		TextView lozenge_text;
+		Button lozenge_button;
 		LinearLayout dropdown_header_view;
 		TextView dropdown_header_text;
 		ProgressBar dropdown_header_working;
@@ -164,12 +184,15 @@ public class ControlFragment extends Fragment {
 		
 		Drawable nonerror_text_background;
 		
-		LocationPicker( final MainActivity.TerminusManager terminus, final ProgressBar working, final ListView dropdown, EditText text, Button button ){
+		LocationPicker( final MainActivity.TerminusManager terminus, final ProgressBar working, final ListView dropdown, EditText text, Button button, RelativeLayout lozenge ){
 			this.retryCount = 0;
 			
 			this.terminus = terminus;
 			this.working = working;
 			this.dropdown = dropdown;
+			this.lozenge = lozenge;
+			this.lozenge_text = (TextView)lozenge.findViewById(R.id.lozenge_text);
+			this.lozenge_button = (Button)lozenge.findViewById(R.id.lozenge_button);
 			
 			this.text = text;
 			this.button = button;
@@ -211,9 +234,16 @@ public class ControlFragment extends Fragment {
 
 				@Override
 				public void onClick(View arg0) {
-					if(terminus.type == MainActivity.TerminusManager.BLANK){
-						terminus.setFromMyLocation();
-					} else {
+					terminus.setFromMyLocation();
+				}
+
+			});
+			
+			this.lozenge_button.setOnClickListener( new OnClickListener() {
+
+				@Override
+				public void onClick(View arg0) {
+					if(terminus.type != MainActivity.TerminusManager.BLANK){
 						terminus.clear();
 					} 
 				}
@@ -307,29 +337,35 @@ public class ControlFragment extends Fragment {
 
 		void clear(){
 			button.setText("GPS");
-			text.setEnabled(true);
 			text.setText("");
+			text.setEnabled(true);
+			lozenge_text.setText("");
+			lozenge.setVisibility(View.GONE);
+			text.requestFocus();
 		}
 		
 		void setFromMyLocation() {
-			button.setText("X");
+			working.setVisibility(View.GONE);
+			hideDropdown();
 			text.setEnabled(false);
-			text.setText("My Location");
+			lozenge_text.setText("My location");
+			lozenge.setVisibility(View.VISIBLE);
 		}
 		
 		void setFromMap(GeoPoint pt) {
 			working.setVisibility(View.GONE);
 			hideDropdown();
-			button.setText("X");
-			text.setText("FROM MAP");
 			text.setEnabled(false);
+			lozenge_text.setText("Selected from map");
+			lozenge.setVisibility(View.VISIBLE);
 		}
 
 		void setFromAddress( Address address ) {
-			text.setEnabled(false);
-			text.setText( address.getAddressLine(0) );
+			working.setVisibility(View.GONE);
 			hideDropdown();
-			button.setText("X");
+			text.setEnabled(false);
+			lozenge_text.setText( address.getAddressLine(0) );
+			lozenge.setVisibility(View.VISIBLE);
 		}
 
 		private void cancelGeocoding() {
@@ -367,14 +403,16 @@ public class ControlFragment extends Fragment {
 		EditText o_text = (EditText)fragView.findViewById(R.id.orig_text);
 		Button o_button = (Button)fragView.findViewById(R.id.orig_button);
 		ListView o_dropdown = (ListView)fragView.findViewById( R.id.orig_dropdown );
-		orig = new LocationPicker( activity.orig, o_working, o_dropdown, o_text, o_button );
+		RelativeLayout o_lozenge = (RelativeLayout)fragView.findViewById( R.id.orig_lozenge );
+		orig = new LocationPicker( activity.orig, o_working, o_dropdown, o_text, o_button, o_lozenge );
 		
 		// Build destination tri-picker
 		ProgressBar d_working = (ProgressBar)fragView.findViewById(R.id.dest_working);
 		EditText d_text = (EditText)fragView.findViewById(R.id.dest_text);
 		Button d_button = (Button)fragView.findViewById(R.id.dest_button);
 		ListView d_dropdown = (ListView)fragView.findViewById( R.id.dest_dropdown );
-		dest = new LocationPicker( activity.dest, d_working, d_dropdown, d_text, d_button );
+		RelativeLayout d_lozenge = (RelativeLayout)fragView.findViewById( R.id.dest_lozenge );
+		dest = new LocationPicker( activity.dest, d_working, d_dropdown, d_text, d_button, d_lozenge );
 				
 		// "use transit" checkbox
         CheckBox use_transit = (CheckBox)fragView.findViewById(R.id.checkbox_usetransit);

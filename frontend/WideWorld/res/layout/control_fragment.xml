@@ -15,7 +15,64 @@
         android:layout_toLeftOf="@+id/orig_button"
         android:ems="10"
         android:hint="@string/orig_hint"
-        android:inputType="text" />
+        android:inputType="text">
+        
+    </EditText>
+    
+<RelativeLayout
+    android:id="@+id/orig_lozenge"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_alignBottom="@+id/orig_text"
+    android:layout_alignLeft="@+id/orig_text"
+    android:layout_alignRight="@+id/orig_text"
+    android:layout_alignTop="@+id/orig_text"
+    android:padding="6dp"
+    android:visibility="gone" >
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="lozenge"
+        android:src="@drawable/lozenge" >
+        
+    </ImageView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <TextView
+            android:id="@+id/lozenge_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="17 Massachussets Ave"
+            android:paddingLeft="9dp"
+            android:layout_weight="1"
+            android:textSize="17sp"
+            android:layout_gravity="center_vertical" >
+            
+        </TextView>
+	    <ImageView
+	        android:layout_width="1.5dp"
+	        android:layout_height="match_parent"
+	        android:contentDescription="divider"
+	        android:src="@drawable/lozenge_line" >
+	        
+	    </ImageView>
+
+        <Button
+            android:id="@+id/lozenge_button"
+            android:layout_width="35dp"
+            android:layout_height="match_parent"
+            android:background="#00ffffff"
+            android:text="X" >
+            
+        </Button>
+    </LinearLayout>
+    
+</RelativeLayout>
+
+
 
     <requestFocus
         android:layout_width="match_parent"
@@ -32,6 +89,59 @@
         android:hint="@string/dest_hint"
         android:inputType="text" >
     </EditText>
+    
+<RelativeLayout
+    android:id="@+id/dest_lozenge"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_alignBottom="@+id/dest_text"
+    android:layout_alignLeft="@+id/dest_text"
+    android:layout_alignRight="@+id/dest_text"
+    android:layout_alignTop="@+id/dest_text"
+    android:padding="6dp"
+    android:visibility="gone" >
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="lozenge"
+        android:src="@drawable/lozenge" >
+        
+    </ImageView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <TextView
+            android:id="@+id/lozenge_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="17 Massachussets Ave"
+            android:paddingLeft="9dp"
+            android:layout_weight="1"
+            android:textSize="17sp"
+            android:layout_gravity="center_vertical" >
+            
+        </TextView>
+	    <ImageView
+	        android:layout_width="1.5dp"
+	        android:layout_height="match_parent"
+	        android:contentDescription="divider"
+	        android:src="@drawable/lozenge_line" >
+	        
+	    </ImageView>
+
+        <Button
+            android:id="@+id/lozenge_button"
+            android:layout_width="35dp"
+            android:layout_height="match_parent"
+            android:background="#00ffffff"
+            android:text="X" >
+            
+        </Button>
+    </LinearLayout>
+    
+</RelativeLayout>
 
     <ProgressBar
         android:id="@+id/orig_working"
