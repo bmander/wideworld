@@ -18,6 +18,16 @@
         android:inputType="text">
         
     </EditText>
+
+        <ImageButton
+            android:id="@+id/orig_button"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/orig_text"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:contentDescription="@string/use_gps_alt_text"
+            android:src="@drawable/location" />
     
 <RelativeLayout
     android:id="@+id/orig_lozenge"
@@ -27,7 +37,7 @@
     android:layout_alignLeft="@+id/orig_text"
     android:layout_alignRight="@+id/orig_text"
     android:layout_alignTop="@+id/orig_text"
-    android:padding="6dp"
+    android:padding="7dp"
     android:visibility="gone" >
 
     <ImageView
@@ -60,14 +70,14 @@
 	        
 	    </ImageView>
 
-        <Button
+        <ImageButton
             android:id="@+id/lozenge_button"
             android:layout_width="35dp"
             android:layout_height="match_parent"
             android:background="#00ffffff"
-            android:text="X" >
+            android:src="@drawable/remove" >
             
-        </Button>
+        </ImageButton>
     </LinearLayout>
     
 </RelativeLayout>
@@ -98,7 +108,7 @@
     android:layout_alignLeft="@+id/dest_text"
     android:layout_alignRight="@+id/dest_text"
     android:layout_alignTop="@+id/dest_text"
-    android:padding="6dp"
+    android:padding="7dp"
     android:visibility="gone" >
 
     <ImageView
@@ -131,14 +141,15 @@
 	        
 	    </ImageView>
 
-        <Button
+        <ImageButton
             android:id="@+id/lozenge_button"
             android:layout_width="35dp"
             android:layout_height="match_parent"
             android:background="#00ffffff"
-            android:text="X" >
+            android:text="X"
+            android:src="@drawable/remove" >
             
-        </Button>
+        </ImageButton>
     </LinearLayout>
     
 </RelativeLayout>
@@ -191,21 +202,15 @@
         android:visibility="gone" >
     </ListView>
 
-    <Button
-        android:id="@+id/orig_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/orig_text"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true" />
-    
-    <Button
+    <ImageButton
         android:id="@+id/dest_button"
-        android:layout_width="wrap_content"
+        android:layout_width="40dp"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/dest_text"
         android:layout_alignParentRight="true"
-        android:layout_alignTop="@+id/dest_text" />
+        android:layout_alignTop="@+id/dest_text"
+        android:contentDescription="@string/use_gps_alt_text"
+        android:src="@drawable/location" />
 
     <Spinner
         android:id="@+id/speed_spinner"

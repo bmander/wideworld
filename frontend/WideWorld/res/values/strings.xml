@@ -12,4 +12,5 @@
         <item>Faster</item>
     </string-array>
     <string name="go_text">Go!</string>
+    <string name="use_gps_alt_text">Use GPS</string>
 </resources>

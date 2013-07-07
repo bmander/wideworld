@@ -32,6 +32,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -173,10 +174,10 @@ public class ControlFragment extends Fragment {
 		ProgressBar working;
 		ListView dropdown;
 		EditText text;
-		Button button;
+		ImageButton button;
 		RelativeLayout lozenge;
 		TextView lozenge_text;
-		Button lozenge_button;
+		ImageButton lozenge_button;
 		LinearLayout dropdown_header_view;
 		TextView dropdown_header_text;
 		ProgressBar dropdown_header_working;
@@ -184,7 +185,7 @@ public class ControlFragment extends Fragment {
 		
 		Drawable nonerror_text_background;
 		
-		LocationPicker( final MainActivity.TerminusManager terminus, final ProgressBar working, final ListView dropdown, EditText text, Button button, RelativeLayout lozenge ){
+		LocationPicker( final MainActivity.TerminusManager terminus, final ProgressBar working, final ListView dropdown, EditText text, ImageButton button, RelativeLayout lozenge ){
 			this.retryCount = 0;
 			
 			this.terminus = terminus;
@@ -192,7 +193,7 @@ public class ControlFragment extends Fragment {
 			this.dropdown = dropdown;
 			this.lozenge = lozenge;
 			this.lozenge_text = (TextView)lozenge.findViewById(R.id.lozenge_text);
-			this.lozenge_button = (Button)lozenge.findViewById(R.id.lozenge_button);
+			this.lozenge_button = (ImageButton)lozenge.findViewById(R.id.lozenge_button);
 			
 			this.text = text;
 			this.button = button;
@@ -336,7 +337,6 @@ public class ControlFragment extends Fragment {
 		}
 
 		void clear(){
-			button.setText("GPS");
 			text.setText("");
 			text.setEnabled(true);
 			lozenge_text.setText("");
@@ -401,7 +401,7 @@ public class ControlFragment extends Fragment {
 		// Build origin tri-picker
 		ProgressBar o_working = (ProgressBar)fragView.findViewById(R.id.orig_working);
 		EditText o_text = (EditText)fragView.findViewById(R.id.orig_text);
-		Button o_button = (Button)fragView.findViewById(R.id.orig_button);
+		ImageButton o_button = (ImageButton)fragView.findViewById(R.id.orig_button);
 		ListView o_dropdown = (ListView)fragView.findViewById( R.id.orig_dropdown );
 		RelativeLayout o_lozenge = (RelativeLayout)fragView.findViewById( R.id.orig_lozenge );
 		orig = new LocationPicker( activity.orig, o_working, o_dropdown, o_text, o_button, o_lozenge );
@@ -409,7 +409,7 @@ public class ControlFragment extends Fragment {
 		// Build destination tri-picker
 		ProgressBar d_working = (ProgressBar)fragView.findViewById(R.id.dest_working);
 		EditText d_text = (EditText)fragView.findViewById(R.id.dest_text);
-		Button d_button = (Button)fragView.findViewById(R.id.dest_button);
+		ImageButton d_button = (ImageButton)fragView.findViewById(R.id.dest_button);
 		ListView d_dropdown = (ListView)fragView.findViewById( R.id.dest_dropdown );
 		RelativeLayout d_lozenge = (RelativeLayout)fragView.findViewById( R.id.dest_lozenge );
 		dest = new LocationPicker( activity.dest, d_working, d_dropdown, d_text, d_button, d_lozenge );
