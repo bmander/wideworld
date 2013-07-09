@@ -24,6 +24,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.HeaderViewListAdapter;
@@ -153,7 +154,7 @@ public class ControlFragment extends Fragment {
 		    	if( geocodeResults.size()<1 ){
 		    		locPicker.dropdown_header_text.setText("no results found");
 		    		locPicker.dropdown_header_working.setVisibility(View.GONE);
-		    		locPicker.text.setBackgroundColor( Color.RED );
+		    		locPicker.setErrorState();
 		    	} else {
 		    		locPicker.dropdown.removeHeaderView( locPicker.dropdown_header_view );
 			    	HeaderViewListAdapter dropdownContents = (HeaderViewListAdapter) locPicker.dropdown.getAdapter();
@@ -293,10 +294,21 @@ public class ControlFragment extends Fragment {
 				}
 
 			});
+			
+			this.text.setOnFocusChangeListener(new OnFocusChangeListener(){
+
+				@Override
+				public void onFocusChange(View arg0, boolean hasFocus) {
+					if( !hasFocus ){
+						hideDropdown();
+					}
+				}
+				
+			});
 		}
 		
 		public void setErrorState() {
-			text.setBackgroundColor( Color.RED );
+			text.setBackgroundColor( Color.rgb(255,200,200) );
 		}
 		
 		@SuppressLint("NewApi")

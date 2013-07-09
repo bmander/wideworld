@@ -212,20 +212,34 @@
         android:contentDescription="@string/use_gps_alt_text"
         android:src="@drawable/location" />
 
-    <Spinner
-        android:id="@+id/speed_spinner"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/checkbox_usetransit"
-        android:layout_marginTop="20dp" />
-
     <Button
         android:id="@+id/go_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/speed_spinner"
+        android:layout_below="@+id/speed_layout"
         android:text="@string/go_text" />
+
+    <LinearLayout
+        android:id="@+id/speed_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/checkbox_usetransit"
+        >
+    <TextView
+        android:id="@+id/speed_spinner_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" 
+        android:layout_gravity="center_vertical"
+        android:textSize="16sp"
+        android:text="Biking speed:" />
+
+    <Spinner
+        android:id="@+id/speed_spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+         />
+    </LinearLayout>
 
 </RelativeLayout>
