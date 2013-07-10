@@ -243,10 +243,12 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 		GeoPoint dest = context.getDestination();
 		double lat2 = dest.getLatitudeE6()/1E6;
 		double lng2 = dest.getLongitudeE6()/1E6;
+		
+		double bike_speed = context.getBikeSpeed();
 				
 		Log.v("DEBUG", "start get route...");
 		((MainActivity)getActivity()).startGetRoute();
-		context.routeServer.getRoute(context.routeServer.new Request(lat1, lng1, lat2, lng2, useTransit, 4.5), new RouteServer.FetchRouteCallback(){
+		context.routeServer.getRoute(context.routeServer.new Request(lat1, lng1, lat2, lng2, useTransit, bike_speed), new RouteServer.FetchRouteCallback(){
 			public void onResponse(RouteServer.Response resp){
 				// remove all the old paths from the map
 				if(mPathOverlays != null){

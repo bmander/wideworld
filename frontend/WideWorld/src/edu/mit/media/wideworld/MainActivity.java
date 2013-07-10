@@ -133,6 +133,10 @@ public class MainActivity extends FragmentActivity
 		}
 		
 	}
+
+	static final double BIKE_SPEED_SLOW = 2.0; // meters/second
+	static final double BIKE_SPEED_AVERAGE = 3.1; // meters/second
+	static final double BIKE_SPEED_FAST = 4.5; // meters/second
 	
     RouteServer routeServer;
 	
@@ -141,6 +145,8 @@ public class MainActivity extends FragmentActivity
 	TerminusManager dest;
 	
 	LocationManager locationManager;
+
+	private double bike_speed;
 	
     // ===========================================================
     // Constructors
@@ -149,9 +155,10 @@ public class MainActivity extends FragmentActivity
     public void onCreate(final Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        
+                
         orig = new TerminusManager(this, TerminusManager.ORIG);
         dest = new TerminusManager(this, TerminusManager.DEST);
+        bike_speed = BIKE_SPEED_SLOW;
         
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         
@@ -285,6 +292,14 @@ public class MainActivity extends FragmentActivity
 		if(navFrag!=null){
 			navFrag.finishGetRoute();
 		}
+	}
+
+	public double getBikeSpeed() {
+		return this.bike_speed;
+	}
+
+	public void setBikeSpeed(double bikeSpeed) {
+		this.bike_speed = bikeSpeed;
 	}
 
 

@@ -27,6 +27,7 @@ import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.HeaderViewListAdapter;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -436,6 +437,26 @@ public class ControlFragment extends Fragment {
              R.array.speeds_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(new OnItemSelectedListener(){
+
+			@Override
+			public void onItemSelected(AdapterView<?> parentView, View selectedView,
+					int position, long id) {
+				if( position==0 ){
+					activity.setBikeSpeed( MainActivity.BIKE_SPEED_SLOW );
+				} else if( position==1 ){
+					activity.setBikeSpeed( MainActivity.BIKE_SPEED_AVERAGE );
+				} else if( position==2 ){
+					activity.setBikeSpeed( MainActivity.BIKE_SPEED_FAST );
+				}
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> arg0) {
+				activity.setBikeSpeed( MainActivity.BIKE_SPEED_SLOW );
+			}
+        	
+        });
         
         // Go! button
         Button go_button = (Button)fragView.findViewById(R.id.go_button);
