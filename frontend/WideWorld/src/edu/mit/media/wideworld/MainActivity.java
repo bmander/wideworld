@@ -10,6 +10,7 @@ import android.app.ActionBar.Tab;
 import android.app.ActionBar.TabListener;
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.location.Address;
@@ -227,15 +228,32 @@ public class MainActivity extends FragmentActivity
         	
         });
         
-        actionBar.addTab(navTab);
-        actionBar.addTab(mapTab);
+        actionBar.addTab(navTab,0,false);
+        actionBar.addTab(mapTab,1,false);
+        
+        /* ensure that both fragments, should they somehow live in the fragment manager, are hidden */
+        FragmentManager fm = this.getFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+        Fragment navFrag = fm.findFragmentByTag("nav");
+        if(navFrag != null){
+        	ft.hide(navFrag);
+        }
+        Fragment mapFrag = fm.findFragmentByTag("map");
+        if(mapFrag != null){
+        	ft.hide(mapFrag);
+        }
+        ft.commit();
         
         if( savedInstanceState != null ){
         	int tabState = savedInstanceState.getInt( "tabState" );
         	if( tabState!=0 ){
         		int tabPos = tabState-1; //tabState is the tab number plus one, so that 0 stays reserved for no info
         		actionBar.setSelectedNavigationItem(tabPos);
+        	} else {
+        		actionBar.setSelectedNavigationItem(0);
         	}
+        } else {
+        	actionBar.setSelectedNavigationItem(0);
         }
     }
     
