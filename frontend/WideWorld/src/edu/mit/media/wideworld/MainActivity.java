@@ -229,6 +229,22 @@ public class MainActivity extends FragmentActivity
         
         actionBar.addTab(navTab);
         actionBar.addTab(mapTab);
+        
+        if( savedInstanceState != null ){
+        	int tabState = savedInstanceState.getInt( "tabState" );
+        	if( tabState!=0 ){
+        		int tabPos = tabState-1; //tabState is the tab number plus one, so that 0 stays reserved for no info
+        		actionBar.setSelectedNavigationItem(tabPos);
+        	}
+        }
+    }
+    
+    @Override
+    public void onSaveInstanceState(Bundle outState){
+    	super.onSaveInstanceState(outState);
+    	
+    	int tabState = this.getActionBar().getSelectedTab().getPosition()+1;
+    	outState.putInt("tabState", tabState );
     }
     
     @Override
