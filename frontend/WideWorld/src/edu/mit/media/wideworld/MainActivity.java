@@ -186,12 +186,7 @@ public class MainActivity extends FragmentActivity
 					mapFragment = new MapFragment();
 					ft.add( android.R.id.content, mapFragment, "map" );
 				} else {
-					//ft.attach(mapFragment);
-					// TODO do something sensible
-					View vw = mapFragment.getView();
-					if( vw != null ){
-						vw.setVisibility(View.VISIBLE);
-					}
+					ft.show(mapFragment);
 				}
 				
 			}
@@ -199,8 +194,7 @@ public class MainActivity extends FragmentActivity
 			@Override
 			public void onTabUnselected(Tab arg0, FragmentTransaction ft) {
 				Fragment mapFragment = superthis.getFragmentManager().findFragmentByTag("map");
-//				ft.detach( mapFragment );	
-				mapFragment.getView().setVisibility(View.GONE);
+				ft.hide(mapFragment);
 			}
         	
         });
@@ -221,22 +215,14 @@ public class MainActivity extends FragmentActivity
 					navFragment = new ControlFragment();
 					ft.add( android.R.id.content, navFragment, "nav" );
 				} else {
-					//ft.attach(navFragment);
-					View navView = navFragment.getView();
-					// When the screen is tilted, the tab can be selected before navFragment.onViewCreate() is called
-					// in which case the view is null, and we're stuck
-					// TODO: do something sensible here
-					if(navView != null){
-						navView.setVisibility(View.VISIBLE);
-					}
+					ft.show( navFragment );
 				}
 			}
 
 			@Override
 			public void onTabUnselected(Tab arg0, FragmentTransaction ft) {
 				Fragment navFragment = superthis.getFragmentManager().findFragmentByTag("nav");
-//				ft.detach( navFragment );	
-				navFragment.getView().setVisibility(View.GONE);
+				ft.hide( navFragment );
 			}
         	
         });
@@ -260,7 +246,6 @@ public class MainActivity extends FragmentActivity
     @Override
     public void onDestroy(){
     	super.onDestroy();
-    	//this.getFragmentManager().find
     	Log.v("DEBUG", "destroying activity");
     }
     
