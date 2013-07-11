@@ -187,7 +187,11 @@ public class MainActivity extends FragmentActivity
 					ft.add( android.R.id.content, mapFragment, "map" );
 				} else {
 					//ft.attach(mapFragment);
-					mapFragment.getView().setVisibility(View.VISIBLE);
+					// TODO do something sensible
+					View vw = mapFragment.getView();
+					if( vw != null ){
+						vw.setVisibility(View.VISIBLE);
+					}
 				}
 				
 			}
@@ -218,7 +222,13 @@ public class MainActivity extends FragmentActivity
 					ft.add( android.R.id.content, navFragment, "nav" );
 				} else {
 					//ft.attach(navFragment);
-					navFragment.getView().setVisibility(View.VISIBLE);
+					View navView = navFragment.getView();
+					// When the screen is tilted, the tab can be selected before navFragment.onViewCreate() is called
+					// in which case the view is null, and we're stuck
+					// TODO: do something sensible here
+					if(navView != null){
+						navView.setVisibility(View.VISIBLE);
+					}
 				}
 			}
 
@@ -237,16 +247,20 @@ public class MainActivity extends FragmentActivity
     
     @Override
     public void onPause(){
+    	super.onPause();
     	Log.v("DEBUG", "pausing activity");
     }
     
     @Override
     public void onStop(){
+    	super.onStop();
     	Log.v("DEBUG", "stopping activity");
     }
     
     @Override
     public void onDestroy(){
+    	super.onDestroy();
+    	//this.getFragmentManager().find
     	Log.v("DEBUG", "destroying activity");
     }
     

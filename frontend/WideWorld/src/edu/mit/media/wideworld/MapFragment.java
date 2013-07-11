@@ -78,6 +78,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
     	Log.v("DEBUG", "CREATE VIEW; mPathOverlays already has "+mPathOverlays+" items");
         mResourceProxy = new ResourceProxyImpl(inflater.getContext().getApplicationContext());
         mMapView = new MapView(inflater.getContext(), 256, mResourceProxy);
+        
         mMapView.setUseSafeCanvas(true);
         setHardwareAccelerationOff();
         

@@ -480,6 +480,49 @@ public class ControlFragment extends Fragment {
 		((Button)getView().findViewById(R.id.go_button)).setText("go!");
 	}
 	
+	@Override
+	public void onPause(){
+		super.onPause();
+		Log.v("DEBUG", "control fragment pause");
+	}
+	
+	@Override
+	public void onStop(){
+		super.onStop();
+		Log.v("DEBUG", "control stop");
+	}
+	
+	@Override
+	public void onDestroyView(){
+		super.onDestroyView();
+		Log.v("DEBUG", "control destroyview");
+	}
+	
+	@Override
+	public void onDestroy(){
+		super.onDestroy();
+		Log.v("DEBUG", "control destroy");
+	}
+	
+	@Override
+	public void onDetach(){
+		super.onDetach();
+		Log.v("DEBUG", "control detach");
+	}
+	
+	@Override
+	public
+	void onStart(){
+		super.onStart();
+		Log.v("DEBUG", "control start");
+	}
+	
+	@Override
+	public
+	void onResume(){
+		super.onResume();
+		Log.v("DEBUG", "control resume");
+	}
 
 
 
