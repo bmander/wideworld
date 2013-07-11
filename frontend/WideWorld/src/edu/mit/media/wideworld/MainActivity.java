@@ -18,6 +18,7 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 
@@ -232,6 +233,21 @@ public class MainActivity extends FragmentActivity
         
         actionBar.addTab(navTab);
         actionBar.addTab(mapTab);
+    }
+    
+    @Override
+    public void onPause(){
+    	Log.v("DEBUG", "pausing activity");
+    }
+    
+    @Override
+    public void onStop(){
+    	Log.v("DEBUG", "stopping activity");
+    }
+    
+    @Override
+    public void onDestroy(){
+    	Log.v("DEBUG", "destroying activity");
     }
     
 	public void onCheckboxClicked(View view) {
