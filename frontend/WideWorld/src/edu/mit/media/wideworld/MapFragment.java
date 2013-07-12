@@ -70,6 +70,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
     {
         super.onCreate(savedInstanceState);
         top = (MainActivity)getActivity();
+        this.setRetainInstance(true);
     }
 
     @Override
