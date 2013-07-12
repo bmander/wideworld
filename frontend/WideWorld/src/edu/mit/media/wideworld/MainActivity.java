@@ -1,8 +1,13 @@
 package edu.mit.media.wideworld;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.overlay.PathOverlay;
 
 import android.annotation.TargetApi;
 import android.app.ActionBar;
@@ -13,11 +18,13 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Message;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
@@ -134,6 +141,8 @@ public class MainActivity extends FragmentActivity
 
 	private double bike_speed;
 	
+	ArrayList<PathOverlay> mPathOverlays=null;
+	
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -172,7 +181,7 @@ public class MainActivity extends FragmentActivity
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         
         routeServer = new RouteServer("wideworld.media.mit.edu", "bos");
-        
+                
         ActionBar actionBar = this.getActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         
@@ -312,11 +321,99 @@ public class MainActivity extends FragmentActivity
 	}
 
 
-	public void findAndDisplayRoute() {
-		MapFragment mapFrag = (MapFragment) getFragmentManager().findFragmentByTag("map");
-		if(mapFrag != null){
-			mapFrag.findAndDisplayRoute();
+	protected void findAndDisplayRoute() {		
+		
+		if( this.getOrigin()==null || this.getDestination()==null ){
+			return;
 		}
+		
+		// get the orig and dest points
+		GeoPoint orig = this.getOrigin();
+		double lat1 = orig.getLatitudeE6()/1E6;
+		double lng1 = orig.getLongitudeE6()/1E6;
+		GeoPoint dest = this.getDestination();
+		double lat2 = dest.getLatitudeE6()/1E6;
+		double lng2 = dest.getLongitudeE6()/1E6;
+		
+		double bike_speed = this.getBikeSpeed();
+				
+		Log.v("DEBUG", "start get route...");
+		this.startGetRoute();
+		final Activity superthis = this;
+		this.routeServer.getRoute(this.routeServer.new Request(lat1, lng1, lat2, lng2, useTransit, bike_speed), new RouteServer.FetchRouteCallback(){
+			public void onResponse(RouteServer.Response resp){
+
+				// prepare the path list to accept new paths
+				mPathOverlays = new ArrayList<PathOverlay>();
+				
+				// get list of legs
+				JSONArray plan;
+				try {
+					plan = resp.rawResponse.getJSONArray("plan");
+				
+					// figure out trip time from first and last leg
+					JSONObject firstLeg = plan.getJSONObject(0);
+					JSONObject lastLeg = plan.getJSONObject(plan.length()-1);
+					
+					JSONArray firstLegLocs = firstLeg.getJSONArray("locs");
+					JSONArray lastLegLocs = lastLeg.getJSONArray("locs");
+					
+					JSONObject firstLoc = firstLegLocs.getJSONObject(0);
+					JSONObject lastLoc = lastLegLocs.getJSONObject(lastLegLocs.length()-1);
+					
+					int firstLocTime = firstLoc.getInt("time");
+					int lastLocTime = lastLoc.getInt("time");
+					
+					Log.v("DEBUG", "total time: "+(lastLocTime-firstLocTime)+"s" );
+					
+					// for each leg
+					for(int i=0; i<plan.length(); i++){
+						JSONObject leg = plan.getJSONObject(i);
+						int pathColor = Color.GRAY;
+						if( leg.getString("type").equals("transit") ) {
+							pathColor = Color.RED;
+						} else if (leg.getString("type").equals("walk") && leg.getString("mode").equals("walk")){
+							pathColor = Color.BLUE;
+						} else if (leg.getString("type").equals("walk") && leg.getString("mode").equals("bikeshare")){
+						    pathColor = Color.GREEN;
+						}
+						
+						// create path overlay
+						PathOverlay pathoverlay = new PathOverlay(pathColor,superthis);
+						pathoverlay.getPaint().setStrokeWidth(5.0f);
+	
+						// populate path overlay
+						JSONArray leg_locs = leg.getJSONArray("locs");
+						for(int j=0; j<leg_locs.length(); j++){
+							JSONObject loc = leg_locs.getJSONObject(j);
+							double lng = loc.getDouble("lon");
+							double lat = loc.getDouble("lat");
+							pathoverlay.addPoint(new GeoPoint(lat,lng));
+						}	
+	
+						// add path overlay to map
+						mPathOverlays.add(pathoverlay);
+	
+					}
+
+					Message msg = new Message();
+					msg.arg1 = firstLocTime;
+					msg.arg2 = lastLocTime;
+					msg.obj = this;
+					MapFragment mapFragment = (MapFragment) superthis.getFragmentManager().findFragmentByTag("map");
+					if( mapFragment != null ){
+						MapFragment.mHandler.sendMessage(msg);
+					}
+					
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+				Log.v("DEBUG", "finish get route.");
+				finishGetRoute(); //TODO probably crash, not in handler
+				
+			}
+		});
+		
 	}
 
 	public GeoPoint getOrigin() {
@@ -362,6 +459,7 @@ public class MainActivity extends FragmentActivity
 		ControlFragment navFrag = (ControlFragment) getFragmentManager().findFragmentByTag("nav");
 		if(navFrag!=null){
 			navFrag.finishGetRoute();
+			
 		}
 	}
 

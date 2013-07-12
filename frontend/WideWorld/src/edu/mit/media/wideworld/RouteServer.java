@@ -59,10 +59,10 @@ public class RouteServer {
 	}
 	
 	void getRoute( Request request, final FetchRouteCallback callback ){
-		class FetchRouteTask extends AsyncTask<String, Void, Void> {
+		class FetchRouteTask extends AsyncTask<String, Void, Response> {
 			
 			@Override
-			protected Void doInBackground(String... url) {
+			protected Response doInBackground(String... url) {
 				
 				// there's a lot that can go wrong here...
 				try {
@@ -90,7 +90,8 @@ public class RouteServer {
 				        Response resp = new Response();
 				        resp.rawResponse = object;
 				        
-				        callback.onResponse( resp );
+				        return resp;
+				        
 				        
 				        
 				    } else{
@@ -113,6 +114,11 @@ public class RouteServer {
 				}
 				
 				return null;
+			}
+			
+			@Override
+			protected void onPostExecute(Response resp){
+				callback.onResponse( resp );
 			}
 			
 		}

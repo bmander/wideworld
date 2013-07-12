@@ -4,9 +4,6 @@ package edu.mit.media.wideworld;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.osmdroid.ResourceProxy;
 import org.osmdroid.tileprovider.tilesource.ITileSource;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
@@ -26,7 +23,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -58,7 +54,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
     private SharedPreferences mPrefs;
     private static MapView mMapView;
     private ResourceProxy mResourceProxy;
-    private List<PathOverlay> mPathOverlays;
+    private static List<PathOverlay> mPathOverlays;
     private Overlay origOverlay=null;
     private Overlay destOverlay=null;
     private MyLocationOverlay locOverlay = null;
@@ -234,111 +230,27 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 		}
 	}
 
-	protected void findAndDisplayRoute() {
-		final MainActivity context = (MainActivity)this.getActivity();
-		
-	    boolean useTransit = context.useTransit;
-		
-		if( context.getOrigin()==null || context.getDestination()==null ){
-			return;
-		}
-		
-		// get the orig and dest points
-		GeoPoint orig = context.getOrigin();
-		double lat1 = orig.getLatitudeE6()/1E6;
-		double lng1 = orig.getLongitudeE6()/1E6;
-		GeoPoint dest = context.getDestination();
-		double lat2 = dest.getLatitudeE6()/1E6;
-		double lng2 = dest.getLongitudeE6()/1E6;
-		
-		double bike_speed = context.getBikeSpeed();
-				
-		Log.v("DEBUG", "start get route...");
-		((MainActivity)getActivity()).startGetRoute();
-		context.routeServer.getRoute(context.routeServer.new Request(lat1, lng1, lat2, lng2, useTransit, bike_speed), new RouteServer.FetchRouteCallback(){
-			public void onResponse(RouteServer.Response resp){
-				// remove all the old paths from the map
-				if(mPathOverlays != null){
-					List<Overlay> allOverlays = mMapView.getOverlays();
-					for(int i=0; i<mPathOverlays.size(); i++){
-						allOverlays.remove(mPathOverlays.get(i));
-					}
-				}
-				// prepare the path list to accept new paths
-				mPathOverlays = new ArrayList<PathOverlay>();
-				
-				// get list of legs
-				JSONArray plan;
-				try {
-					plan = resp.rawResponse.getJSONArray("plan");
-				
-					// figure out trip time from first and last leg
-					JSONObject firstLeg = plan.getJSONObject(0);
-					JSONObject lastLeg = plan.getJSONObject(plan.length()-1);
-					
-					JSONArray firstLegLocs = firstLeg.getJSONArray("locs");
-					JSONArray lastLegLocs = lastLeg.getJSONArray("locs");
-					
-					JSONObject firstLoc = firstLegLocs.getJSONObject(0);
-					JSONObject lastLoc = lastLegLocs.getJSONObject(lastLegLocs.length()-1);
-					
-					int firstLocTime = firstLoc.getInt("time");
-					int lastLocTime = lastLoc.getInt("time");
-					
-					Log.v("DEBUG", "total time: "+(lastLocTime-firstLocTime)+"s" );
-					
-					// for each leg
-					for(int i=0; i<plan.length(); i++){
-						JSONObject leg = plan.getJSONObject(i);
-						int pathColor = Color.GRAY;
-						if( leg.getString("type").equals("transit") ) {
-							pathColor = Color.RED;
-						} else if (leg.getString("type").equals("walk") && leg.getString("mode").equals("walk")){
-							pathColor = Color.BLUE;
-						} else if (leg.getString("type").equals("walk") && leg.getString("mode").equals("bikeshare")){
-						    pathColor = Color.GREEN;
-						}
-						
-						// create path overlay
-						PathOverlay pathoverlay = new PathOverlay(pathColor,context);
-						pathoverlay.getPaint().setStrokeWidth(5.0f);
 	
-						// populate path overlay
-						JSONArray leg_locs = leg.getJSONArray("locs");
-						for(int j=0; j<leg_locs.length(); j++){
-							JSONObject loc = leg_locs.getJSONObject(j);
-							double lng = loc.getDouble("lon");
-							double lat = loc.getDouble("lat");
-							pathoverlay.addPoint(new GeoPoint(lat,lng));
-						}	
-	
-						// add path overlay to map
-						mMapView.getOverlays().add(pathoverlay);
-						mPathOverlays.add(pathoverlay);
-	
-					}
-					//mMapView.invalidate();
-					Message msg = new Message();
-					msg.arg1 = firstLocTime;
-					msg.arg2 = lastLocTime;
-					msg.obj = context;
-					mHandler.sendMessage(msg);
-					
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
-				Log.v("DEBUG", "finish get route.");
-				
-			}
-		});
-		
-	}
 	
 	static Handler mHandler = new Handler() {		
         @Override
         public void handleMessage(Message msg) {
         	
-			Toast toast = Toast.makeText((Context)msg.obj, "total time: "+(msg.arg2-msg.arg1)/60+"m", Toast.LENGTH_SHORT);
+        	// remove all the old overlays
+        	List<Overlay> allOverlays = mMapView.getOverlays();
+    		if(mPathOverlays != null){
+    			for(int i=0; i<mPathOverlays.size(); i++){
+    				allOverlays.remove(mPathOverlays.get(i));
+    			}
+    		}
+    		
+    		// use the new overlays
+        	mPathOverlays = top.mPathOverlays;
+        	for(int i=0; i<mPathOverlays.size(); i++){
+        		allOverlays.add(mPathOverlays.get(i));
+        	}
+        	
+			Toast toast = Toast.makeText(top, "total time: "+(msg.arg2-msg.arg1)/60+"m", Toast.LENGTH_SHORT);
 			toast.show();
 			
 			top.finishGetRoute();
