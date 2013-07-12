@@ -29,6 +29,7 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.Toast;
 
 @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
 public class MainActivity extends FragmentActivity
@@ -404,6 +405,9 @@ public class MainActivity extends FragmentActivity
 					if( mapFragment != null ){
 						MapFragment.mHandler.sendMessage(msg);
 					}
+					
+					Toast toast = Toast.makeText(superthis, "total time: "+(lastLocTime-firstLocTime)/60+"m", Toast.LENGTH_SHORT);
+					toast.show();
 					
 				} catch (JSONException e) {
 					e.printStackTrace();

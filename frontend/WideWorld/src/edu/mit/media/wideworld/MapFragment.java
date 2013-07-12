@@ -34,7 +34,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 /**
  * Default map view activity.
@@ -249,11 +248,6 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         	for(int i=0; i<mPathOverlays.size(); i++){
         		allOverlays.add(mPathOverlays.get(i));
         	}
-        	
-			Toast toast = Toast.makeText(top, "total time: "+(msg.arg2-msg.arg1)/60+"m", Toast.LENGTH_SHORT);
-			toast.show();
-			
-			top.finishGetRoute();
 			
             mMapView.invalidate();
         }
