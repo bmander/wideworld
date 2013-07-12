@@ -146,6 +146,8 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         edit.putInt(PREFS_SCROLL_Y, mMapView.getScrollY());
         edit.putInt(PREFS_ZOOM_LEVEL, mMapView.getZoomLevel());
         edit.commit();
+        
+        locOverlay.disableMyLocation();
 
         super.onPause();
     }
@@ -154,6 +156,9 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
     public void onResume()
     {
         super.onResume();
+        
+        locOverlay.enableMyLocation();
+        
         final String tileSourceName = mPrefs.getString(PREFS_TILE_SOURCE,
                 TileSourceFactory.DEFAULT_TILE_SOURCE.name());
         try {
