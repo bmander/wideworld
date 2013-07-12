@@ -117,6 +117,7 @@ public class RouteServer {
 			
 		}
 		String url = "http://"+this.host+"/"+this.instance+"/plan?lat1="+request.lat1+"&lon1="+request.lng1+"&lat2="+request.lat2+"&lon2="+request.lng2+"&bspeed="+request.bikeSpeed+"&transit="+(request.useTransit?"t":"f");
+		Log.v("DEBUG", url);
 		FetchRouteTask rt = new FetchRouteTask();
 		rt.execute(url);
 	}

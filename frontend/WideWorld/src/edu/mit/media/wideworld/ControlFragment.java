@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.osmdroid.util.GeoPoint;
+import edu.mit.media.wideworld.MainActivity.TerminusManager;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -210,11 +210,7 @@ public class ControlFragment extends Fragment {
 			
 			nonerror_text_background = this.text.getBackground();
 			
-			if( terminus.type == MainActivity.TerminusManager.BLANK){
-				clear();
-			} else if( terminus.type == MainActivity.TerminusManager.MAP ){
-				setFromMap( terminus.pt );
-			}
+			setFromTerminus();
 			
 			this.dropdown.setOnItemClickListener( new OnItemClickListener() {
 
@@ -229,6 +225,7 @@ public class ControlFragment extends Fragment {
 					Address selected = data.getItem(position-headerlist.getHeadersCount());
 					
 					terminus.setFromAddress( selected );
+					setFromTerminus();
 				}
 				
 			});
@@ -238,6 +235,7 @@ public class ControlFragment extends Fragment {
 				@Override
 				public void onClick(View arg0) {
 					terminus.setFromMyLocation();
+					setFromTerminus();
 				}
 
 			});
@@ -248,6 +246,7 @@ public class ControlFragment extends Fragment {
 				public void onClick(View arg0) {
 					if(terminus.type != MainActivity.TerminusManager.BLANK){
 						terminus.clear();
+						setFromTerminus();
 					} 
 				}
 
@@ -349,36 +348,59 @@ public class ControlFragment extends Fragment {
 			((AddressAdapter)((HeaderViewListAdapter)dropdown.getAdapter()).getWrappedAdapter()).clear();
 		}
 
-		void clear(){
-			text.setText("");
-			text.setEnabled(true);
-			lozenge_text.setText("");
-			lozenge.setVisibility(View.GONE);
-			text.requestFocus();
-		}
+//		void clear(){
+//			text.setText("");
+//			text.setEnabled(true);
+//			lozenge_text.setText("");
+//			lozenge.setVisibility(View.GONE);
+//			text.requestFocus();
+//		}
+//		
+//		void setFromMyLocation() {
+//			working.setVisibility(View.GONE);
+//			hideDropdown();
+//			text.setEnabled(false);
+//			lozenge_text.setText("My location");
+//			lozenge.setVisibility(View.VISIBLE);
+//		}
+//		
+//		void setFromMap(GeoPoint pt) {
+//			working.setVisibility(View.GONE);
+//			hideDropdown();
+//			text.setEnabled(false);
+//			lozenge_text.setText("Selected from map");
+//			lozenge.setVisibility(View.VISIBLE);
+//		}
+//
+//		void setFromAddress( Address address ) {
+//			working.setVisibility(View.GONE);
+//			hideDropdown();
+//			text.setEnabled(false);
+//			lozenge_text.setText( address.getAddressLine(0) );
+//			lozenge.setVisibility(View.VISIBLE);
+//		}
 		
-		void setFromMyLocation() {
+		void setFromTerminus(){
 			working.setVisibility(View.GONE);
 			hideDropdown();
-			text.setEnabled(false);
-			lozenge_text.setText("My location");
-			lozenge.setVisibility(View.VISIBLE);
-		}
-		
-		void setFromMap(GeoPoint pt) {
-			working.setVisibility(View.GONE);
-			hideDropdown();
-			text.setEnabled(false);
-			lozenge_text.setText("Selected from map");
-			lozenge.setVisibility(View.VISIBLE);
-		}
-
-		void setFromAddress( Address address ) {
-			working.setVisibility(View.GONE);
-			hideDropdown();
-			text.setEnabled(false);
-			lozenge_text.setText( address.getAddressLine(0) );
-			lozenge.setVisibility(View.VISIBLE);
+			
+			if( terminus.type==TerminusManager.BLANK ){
+				text.setText("");
+				text.setEnabled(true);
+				lozenge_text.setText("");
+				lozenge.setVisibility(View.GONE);
+				text.requestFocus();
+			} else {
+				text.setEnabled(false);
+				if( terminus.type==TerminusManager.GPS){
+					lozenge_text.setText("My location");
+				} else if (terminus.type==TerminusManager.ADDRESS){
+					lozenge_text.setText( terminus.desc );
+				} else if (terminus.type==TerminusManager.MAP){
+					lozenge_text.setText("Selected from map");
+				}
+				lozenge.setVisibility(View.VISIBLE);
+			}
 		}
 
 		private void cancelGeocoding() {

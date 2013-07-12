@@ -37,6 +37,7 @@ public class MainActivity extends FragmentActivity
 		
 		MainActivity activity;
 		GeoPoint pt=null;
+		String desc=null;
 		int type;
 		int end;
 		
@@ -49,6 +50,7 @@ public class MainActivity extends FragmentActivity
 		public void clear() {
 			this.type = TerminusManager.BLANK;
 			this.pt = null;
+			this.desc = null;
 			
 			MapFragment mapFrag = (MapFragment) getFragmentManager().findFragmentByTag("map");
 			if( mapFrag!=null){
@@ -58,19 +60,13 @@ public class MainActivity extends FragmentActivity
 					mapFrag.removeDestinationIcon();
 				}
 			}
-			ControlFragment navFrag = (ControlFragment) getFragmentManager().findFragmentByTag("nav");
-			if(navFrag!=null){
-				if( end == ORIG){
-					navFrag.orig.clear();
-				} else if (end==DEST){
-					navFrag.dest.clear();
-				}
-			}
+
 		}
 		
 		public void setFromAddress(Address selected) {
 			this.pt = new GeoPoint( selected.getLatitude(), selected.getLongitude() );
 			this.type = TerminusManager.ADDRESS;
+			this.desc = selected.getAddressLine(0);
 			
 			MapFragment mapFrag = (MapFragment) getFragmentManager().findFragmentByTag("map");
 			if(mapFrag!=null){
@@ -80,19 +76,13 @@ public class MainActivity extends FragmentActivity
 					mapFrag.setDestinationIcon( pt );
 				}
 			}
-			ControlFragment navFrag = (ControlFragment) getFragmentManager().findFragmentByTag("nav");
-			if(navFrag!=null){
-				if( this.end == ORIG ) {
-					navFrag.orig.setFromAddress( selected );
-				} else if (this.end == DEST) {
-					navFrag.dest.setFromAddress( selected );
-				}
-			}
+
 
 		}
 		
 		public void setFromMyLocation() {
 			type = TerminusManager.GPS;
+			this.desc = null;
 			
 			MapFragment mapFrag = (MapFragment) getFragmentManager().findFragmentByTag("map");
 			if(mapFrag!=null){
@@ -102,26 +92,20 @@ public class MainActivity extends FragmentActivity
 					mapFrag.removeDestinationIcon();
 				}
 			}
-			ControlFragment navFrag = (ControlFragment) getFragmentManager().findFragmentByTag("nav");
-			if(navFrag!=null){
-				if( this.end == ORIG ){
-					navFrag.orig.setFromMyLocation();
-				} else {
-					navFrag.dest.setFromMyLocation();
-				}
-			}
+
 		}
 		
 		public void setFromMap(GeoPoint pt) {
 			this.pt = pt;
 			type = TerminusManager.MAP;
+			this.desc = null;
 			
 			ControlFragment navFragment = (ControlFragment) getFragmentManager().findFragmentByTag("nav");
 			if(navFragment != null){
 				if( this.end == ORIG ){
-					navFragment.orig.setFromMap( pt );
+					navFragment.orig.setFromTerminus();
 				} else if( this.end == DEST ){
-					navFragment.dest.setFromMap( pt );
+					navFragment.dest.setFromTerminus();
 				}
 			}
 			MapFragment mapFrag = (MapFragment) getFragmentManager().findFragmentByTag("map");
@@ -157,10 +141,33 @@ public class MainActivity extends FragmentActivity
     public void onCreate(final Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-                
+        
         orig = new TerminusManager(this, TerminusManager.ORIG);
         dest = new TerminusManager(this, TerminusManager.DEST);
         bike_speed = BIKE_SPEED_SLOW;
+        if( savedInstanceState != null){
+        	// reincarnate the origin
+        	int origLat = savedInstanceState.getInt("origLat");
+        	int origLon = savedInstanceState.getInt("origLon");
+        	int origType = savedInstanceState.getInt("origType");
+        	String origDesc = savedInstanceState.getString("origDesc");
+        	GeoPoint origPt = new GeoPoint(origLat, origLon);
+        	orig.pt = origPt;
+        	orig.type = origType;
+        	orig.desc = origDesc;
+        	
+        	// reincarnate the destination
+        	int destLat = savedInstanceState.getInt("destLat");
+        	int destLon = savedInstanceState.getInt("destLon");
+        	int destType = savedInstanceState.getInt("destType");
+        	String destDesc = savedInstanceState.getString("destDesc");
+        	GeoPoint destPt = new GeoPoint(destLat, destLon);
+        	dest.pt = destPt;
+        	dest.type = destType;
+        	dest.desc = destDesc;
+        	
+        	bike_speed = savedInstanceState.getDouble("bikeSpeed");
+        }
         
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         
@@ -263,6 +270,21 @@ public class MainActivity extends FragmentActivity
     	
     	int tabState = this.getActionBar().getSelectedTab().getPosition()+1;
     	outState.putInt("tabState", tabState );
+    	
+    	// put origin terminus into instance state
+    	outState.putInt("origLat", orig.pt==null ? 0 : orig.pt.getLatitudeE6());
+    	outState.putInt("origLon", orig.pt==null ? 0 : orig.pt.getLongitudeE6());
+    	outState.putInt("origType", orig.type);
+    	outState.putString("origDesc", orig.desc);
+    	
+    	// put destination terminus into instance state
+    	outState.putInt("destLat", dest.pt==null ? 0 : dest.pt.getLatitudeE6());
+    	outState.putInt("destLon", dest.pt==null ? 0 : dest.pt.getLongitudeE6());
+    	outState.putInt("destType", dest.type);
+    	outState.putString("destDesc", dest.desc);
+    	
+    	// but biking speed into state
+    	outState.putDouble("bikeSpeed", bike_speed);
     }
     
     @Override
