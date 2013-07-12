@@ -89,6 +89,7 @@ public class MainActivity extends FragmentActivity
 		}
 		
 		public void setFromMyLocation() {
+			
 			type = TerminusManager.GPS;
 			this.desc = null;
 			
@@ -413,7 +414,7 @@ public class MainActivity extends FragmentActivity
 					e.printStackTrace();
 				}
 				Log.v("DEBUG", "finish get route.");
-				finishGetRoute(); //TODO probably crash, not in handler
+				finishGetRoute();
 				
 			}
 		});
@@ -442,6 +443,7 @@ public class MainActivity extends FragmentActivity
 		for(int i=0; i<providers.size(); i++){
 			String provider = providers.get(i);
 			Location location = locationManager.getLastKnownLocation( provider );
+			if(location==null){ continue; }
 			if( bestLocation==null || location.getAccuracy()<bestLocation.getAccuracy() ){
 				bestLocation = location;
 			}
