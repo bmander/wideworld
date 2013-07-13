@@ -4,6 +4,9 @@ package edu.mit.media.wideworld;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.osmdroid.ResourceProxy;
 import org.osmdroid.tileprovider.tilesource.ITileSource;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
@@ -23,12 +26,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.app.Fragment;
-//import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -229,31 +230,6 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 		}
 	}
 
-	
-	
-	static Handler mHandler = new Handler() {		
-        @Override
-        public void handleMessage(Message msg) {
-        	
-        	// remove all the old overlays
-        	List<Overlay> allOverlays = mMapView.getOverlays();
-    		if(mPathOverlays != null){
-    			for(int i=0; i<mPathOverlays.size(); i++){
-    				allOverlays.remove(mPathOverlays.get(i));
-    			}
-    		}
-    		
-    		// use the new overlays
-        	mPathOverlays = top.mPathOverlays;
-        	for(int i=0; i<mPathOverlays.size(); i++){
-        		allOverlays.add(mPathOverlays.get(i));
-        	}
-			
-            mMapView.invalidate();
-        }
-
-	};
-
 	public class GestureOverlay extends Overlay {
 		
 		Context context;
@@ -295,6 +271,81 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         }
         
         
+	}
+
+	public void finishGetRoute() {
+    	// remove all the old overlays
+    	List<Overlay> allOverlays = mMapView.getOverlays();
+		if(mPathOverlays != null){
+			for(int i=0; i<mPathOverlays.size(); i++){
+				allOverlays.remove(mPathOverlays.get(i));
+			}
+		}
+		
+		// prepare the path list to accept new paths
+		mPathOverlays = new ArrayList<PathOverlay>();
+		
+		// get list of legs
+		JSONArray plan;
+		try {
+			plan = top.routeResponse.rawResponse.getJSONArray("plan");
+		
+			// figure out trip time from first and last leg
+			JSONObject firstLeg = plan.getJSONObject(0);
+			JSONObject lastLeg = plan.getJSONObject(plan.length()-1);
+			
+			JSONArray firstLegLocs = firstLeg.getJSONArray("locs");
+			JSONArray lastLegLocs = lastLeg.getJSONArray("locs");
+			
+			JSONObject firstLoc = firstLegLocs.getJSONObject(0);
+			JSONObject lastLoc = lastLegLocs.getJSONObject(lastLegLocs.length()-1);
+			
+			int firstLocTime = firstLoc.getInt("time");
+			int lastLocTime = lastLoc.getInt("time");
+			
+			Log.v("DEBUG", "total time: "+(lastLocTime-firstLocTime)+"s" );
+			
+			// for each leg
+			for(int i=0; i<plan.length(); i++){
+				JSONObject leg = plan.getJSONObject(i);
+				int pathColor = Color.GRAY;
+				if( leg.getString("type").equals("transit") ) {
+					pathColor = Color.RED;
+				} else if (leg.getString("type").equals("walk") && leg.getString("mode").equals("walk")){
+					pathColor = Color.BLUE;
+				} else if (leg.getString("type").equals("walk") && leg.getString("mode").equals("bikeshare")){
+				    pathColor = Color.GREEN;
+				}
+				
+				// create path overlay
+				PathOverlay pathoverlay = new PathOverlay(pathColor,getActivity());
+				pathoverlay.getPaint().setStrokeWidth(5.0f);
+
+				// populate path overlay
+				JSONArray leg_locs = leg.getJSONArray("locs");
+				for(int j=0; j<leg_locs.length(); j++){
+					JSONObject loc = leg_locs.getJSONObject(j);
+					double lng = loc.getDouble("lon");
+					double lat = loc.getDouble("lat");
+					pathoverlay.addPoint(new GeoPoint(lat,lng));
+				}	
+
+				// add path overlay to map
+				mPathOverlays.add(pathoverlay);
+
+			}
+    		
+    		// use the new overlays
+        	for(int i=0; i<mPathOverlays.size(); i++){
+        		allOverlays.add(mPathOverlays.get(i));
+        	}
+			
+            mMapView.invalidate();
+			
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 }

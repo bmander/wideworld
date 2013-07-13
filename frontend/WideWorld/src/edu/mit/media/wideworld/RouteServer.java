@@ -47,6 +47,11 @@ public class RouteServer {
 	
 	public class Response{
 		public JSONObject rawResponse;
+
+		public int duration() {
+			// TODO Auto-generated method stub
+			return 0;
+		}
 	}
 	
 	public interface FetchRouteCallback {
