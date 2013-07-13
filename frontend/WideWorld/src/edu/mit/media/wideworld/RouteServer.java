@@ -97,8 +97,6 @@ public class RouteServer {
 				        
 				        return resp;
 				        
-				        
-				        
 				    } else{
 				        //Closes the connection.
 				        response.getEntity().getContent().close();

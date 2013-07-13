@@ -400,7 +400,7 @@ public class MainActivity extends FragmentActivity
 
 		MapFragment mapFrag = (MapFragment) getFragmentManager().findFragmentByTag("map");
 		if(mapFrag!=null){
-			mapFrag.finishGetRoute();
+			mapFrag.drawRoute();
 		}
 	}
 

@@ -93,6 +93,8 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         	this.setDestinationIcon( top.dest.pt );
         }
         
+        drawRoute();
+        
         return mMapView;
     }
 
@@ -273,7 +275,11 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         
 	}
 
-	public void finishGetRoute() {
+	public void drawRoute() {
+		if( top.routeResponse == null ){
+			return;
+		}
+		
     	// remove all the old overlays
     	List<Overlay> allOverlays = mMapView.getOverlays();
 		if(mPathOverlays != null){
