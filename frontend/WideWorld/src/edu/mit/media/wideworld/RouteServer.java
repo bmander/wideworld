@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -12,9 +14,11 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.osmdroid.util.GeoPoint;
 
 import android.os.AsyncTask;
 import android.util.Log;
@@ -46,11 +50,108 @@ public class RouteServer {
 	}
 	
 	public class Response{
-		public JSONObject rawResponse;
+		class Leg {
+			static final int TYPE_NONE = 0;
+			static final int TYPE_WALK = 1;
+			static final int TYPE_TRANSIT = 2;
+			static final int MODE_NONE = 0;
+			static final int MODE_WALK = 1;
+			static final int MODE_BIKESHARE = 2;
+			
+			int type=TYPE_NONE;
+			int mode=MODE_NONE;
+			List<Location> locs;
+
+			public Leg(JSONObject jsonLeg) throws JSONException {
+				locs = new ArrayList<Location>();
+				
+				String jsonType = jsonLeg.getString("type");
+				if( jsonType.equals("walk") ){
+					type = TYPE_WALK;
+				} else if( jsonType.equals("transit") ){
+					type = TYPE_TRANSIT;
+				}
+				
+				if(type==TYPE_WALK){
+					String jsonMode = jsonLeg.getString("mode");
+					if( jsonMode.equals("walk") ){
+						mode = MODE_WALK;
+					} else if( jsonMode.equals("bikeshare") ){
+						mode = MODE_BIKESHARE;
+					}
+				}
+				
+				JSONArray leg_locs = jsonLeg.getJSONArray("locs");
+				for(int i=0; i<leg_locs.length(); i++){
+					JSONObject jsonLoc = leg_locs.getJSONObject(i);
+					Location loc = new Location(jsonLoc);
+					locs.add( loc );
+				}	
+			}
+
+			public int getLocationCount() {
+				return this.locs.size();
+			}
+
+			public Location getLocation(int i) {
+				return this.locs.get(i);
+			}
+			
+		}
+		
+		class Location{
+			double lat;
+			double lon;
+			
+			public Location(JSONObject jsonLoc) throws JSONException {
+				lon = jsonLoc.getDouble("lon");
+				lat = jsonLoc.getDouble("lat");
+			}
+			
+		}
+		
+		List<Leg> legs;
+		
+		public Response(JSONObject object) {
+			legs = new ArrayList<Leg>();
+			
+			try {
+				JSONArray plan = object.getJSONArray("plan");
+				for(int i=0; i<plan.length(); i++){
+					JSONObject jsonLeg = plan.getJSONObject(i);
+					legs.add( new Leg(jsonLeg) );
+				}
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+		}
 
 		public int duration() {
+//			// figure out trip time from first and last leg
+//			JSONObject firstLeg = plan.getJSONObject(0);
+//			JSONObject lastLeg = plan.getJSONObject(plan.length()-1);
+//			
+//			JSONArray firstLegLocs = firstLeg.getJSONArray("locs");
+//			JSONArray lastLegLocs = lastLeg.getJSONArray("locs");
+//			
+//			JSONObject firstLoc = firstLegLocs.getJSONObject(0);
+//			JSONObject lastLoc = lastLegLocs.getJSONObject(lastLegLocs.length()-1);
+//			
+//			int firstLocTime = firstLoc.getInt("time");
+//			int lastLocTime = lastLoc.getInt("time");
+//			
+//			Log.v("DEBUG", "total time: "+(lastLocTime-firstLocTime)+"s" );
+			
 			// TODO Auto-generated method stub
 			return 0;
+		}
+
+		public int getLegCount() {
+			return this.legs.size();
+		}
+
+		public Leg getLeg(int i) {
+			return this.legs.get(i);
 		}
 	}
 	
@@ -92,8 +193,7 @@ public class RouteServer {
 				        String responseString = out.toString();
 				        
 				        JSONObject object = (JSONObject) new JSONTokener(responseString).nextValue();
-				        Response resp = new Response();
-				        resp.rawResponse = object;
+				        Response resp = new Response(object);
 				        
 				        return resp;
 				        

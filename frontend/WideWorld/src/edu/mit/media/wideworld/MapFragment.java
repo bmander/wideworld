@@ -18,6 +18,9 @@ import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.overlay.PathOverlay;
 
+import edu.mit.media.wideworld.RouteServer.Response;
+import edu.mit.media.wideworld.RouteServer.Response.Leg;
+import edu.mit.media.wideworld.RouteServer.Response.Location;
 import edu.mit.media.wideworld.constants.OpenStreetMapConstants;
 
 import android.annotation.TargetApi;
@@ -290,67 +293,40 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 		
 		// prepare the path list to accept new paths
 		mPathOverlays = new ArrayList<PathOverlay>();
-		
-		// get list of legs
-		JSONArray plan;
-		try {
-			plan = top.routeResponse.rawResponse.getJSONArray("plan");
-		
-			// figure out trip time from first and last leg
-			JSONObject firstLeg = plan.getJSONObject(0);
-			JSONObject lastLeg = plan.getJSONObject(plan.length()-1);
 			
-			JSONArray firstLegLocs = firstLeg.getJSONArray("locs");
-			JSONArray lastLegLocs = lastLeg.getJSONArray("locs");
-			
-			JSONObject firstLoc = firstLegLocs.getJSONObject(0);
-			JSONObject lastLoc = lastLegLocs.getJSONObject(lastLegLocs.length()-1);
-			
-			int firstLocTime = firstLoc.getInt("time");
-			int lastLocTime = lastLoc.getInt("time");
-			
-			Log.v("DEBUG", "total time: "+(lastLocTime-firstLocTime)+"s" );
-			
-			// for each leg
-			for(int i=0; i<plan.length(); i++){
-				JSONObject leg = plan.getJSONObject(i);
-				int pathColor = Color.GRAY;
-				if( leg.getString("type").equals("transit") ) {
-					pathColor = Color.RED;
-				} else if (leg.getString("type").equals("walk") && leg.getString("mode").equals("walk")){
-					pathColor = Color.BLUE;
-				} else if (leg.getString("type").equals("walk") && leg.getString("mode").equals("bikeshare")){
-				    pathColor = Color.GREEN;
-				}
-				
-				// create path overlay
-				PathOverlay pathoverlay = new PathOverlay(pathColor,getActivity());
-				pathoverlay.getPaint().setStrokeWidth(5.0f);
-
-				// populate path overlay
-				JSONArray leg_locs = leg.getJSONArray("locs");
-				for(int j=0; j<leg_locs.length(); j++){
-					JSONObject loc = leg_locs.getJSONObject(j);
-					double lng = loc.getDouble("lon");
-					double lat = loc.getDouble("lat");
-					pathoverlay.addPoint(new GeoPoint(lat,lng));
-				}	
-
-				// add path overlay to map
-				mPathOverlays.add(pathoverlay);
-
+		// for each leg
+		for(int i=0; i<top.routeResponse.getLegCount(); i++){
+			Leg leg = top.routeResponse.getLeg(i);
+			int pathColor = Color.GRAY;
+			if( leg.type == Leg.TYPE_TRANSIT ) {
+				pathColor = Color.RED;
+			} else if (leg.type == Leg.TYPE_WALK && leg.mode == Leg.MODE_WALK){
+				pathColor = Color.BLUE;
+			} else if (leg.type == Leg.TYPE_WALK && leg.mode == Leg.MODE_BIKESHARE){
+			    pathColor = Color.GREEN;
 			}
-    		
-    		// use the new overlays
-        	for(int i=0; i<mPathOverlays.size(); i++){
-        		allOverlays.add(mPathOverlays.get(i));
-        	}
 			
-            mMapView.invalidate();
-			
-		} catch (JSONException e) {
-			e.printStackTrace();
+			// create path overlay
+			PathOverlay pathoverlay = new PathOverlay(pathColor,getActivity());
+			pathoverlay.getPaint().setStrokeWidth(5.0f);
+
+			// populate path overlay
+			for(int j=0; j<leg.getLocationCount(); j++){
+				Location loc = leg.getLocation(j);
+				pathoverlay.addPoint(new GeoPoint(loc.lat,loc.lon));
+			}	
+
+			// add path overlay to map
+			mPathOverlays.add(pathoverlay);
+
 		}
+		
+		// use the new overlays
+    	for(int i=0; i<mPathOverlays.size(); i++){
+    		allOverlays.add(mPathOverlays.get(i));
+    	}
+		
+        mMapView.invalidate();
 		
 	}
 
