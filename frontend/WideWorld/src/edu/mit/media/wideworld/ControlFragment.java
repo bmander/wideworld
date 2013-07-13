@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.mit.media.wideworld.MainActivity.TerminusManager;
+import edu.mit.media.wideworld.RouteServer.Response.Leg;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -418,12 +419,16 @@ public class ControlFragment extends Fragment {
 
 	LocationPicker orig;
 	LocationPicker dest;
+	
+	MainActivity top;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate( savedInstanceState );
 		
-		geocoder = new Geocoder(getActivity());
+		top = (MainActivity) getActivity();
+		
+		geocoder = new Geocoder(top);
 	}
 
 	@Override
@@ -500,6 +505,27 @@ public class ControlFragment extends Fragment {
 
 	public void finishGetRoute() {
 		((Button)getView().findViewById(R.id.go_button)).setText("go!");
+		
+		LinearLayout narrativeContainer = (LinearLayout) getView().findViewById(R.id.narrative_container);
+		narrativeContainer.removeAllViews();
+		
+		for(int i=0; i<top.routeResponse.getLegCount(); i++){
+			Leg leg = top.routeResponse.getLeg(i);
+			
+			LinearLayout legDiv = (LinearLayout) getActivity().getLayoutInflater().inflate( R.layout.leg, narrativeContainer, false );
+			TextView legTitle = (TextView) legDiv.findViewById(R.id.title);
+			TextView legDetails = (TextView) legDiv.findViewById(R.id.details);
+			
+			if(leg.type==Leg.TYPE_TRANSIT){
+				legTitle.setText("TRANSIT");
+			} else if(leg.type==Leg.TYPE_WALK && leg.mode==Leg.MODE_WALK){
+				legTitle.setText("WALK");
+			} else if(leg.type==Leg.TYPE_WALK && leg.mode==Leg.MODE_BIKESHARE){
+				legTitle.setText("BIKESHARE");
+			}
+			
+			narrativeContainer.addView(legDiv);
+		}
 	}
 	
 	@Override
