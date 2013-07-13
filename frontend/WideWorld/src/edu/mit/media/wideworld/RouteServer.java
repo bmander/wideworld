@@ -102,10 +102,12 @@ public class RouteServer {
 		class Location{
 			double lat;
 			double lon;
+			long time;
 			
 			public Location(JSONObject jsonLoc) throws JSONException {
 				lon = jsonLoc.getDouble("lon");
 				lat = jsonLoc.getDouble("lat");
+				time = jsonLoc.getInt("time");
 			}
 			
 		}
@@ -126,24 +128,26 @@ public class RouteServer {
 			}
 		}
 
-		public int duration() {
-//			// figure out trip time from first and last leg
-//			JSONObject firstLeg = plan.getJSONObject(0);
-//			JSONObject lastLeg = plan.getJSONObject(plan.length()-1);
-//			
-//			JSONArray firstLegLocs = firstLeg.getJSONArray("locs");
-//			JSONArray lastLegLocs = lastLeg.getJSONArray("locs");
-//			
-//			JSONObject firstLoc = firstLegLocs.getJSONObject(0);
-//			JSONObject lastLoc = lastLegLocs.getJSONObject(lastLegLocs.length()-1);
-//			
-//			int firstLocTime = firstLoc.getInt("time");
-//			int lastLocTime = lastLoc.getInt("time");
-//			
-//			Log.v("DEBUG", "total time: "+(lastLocTime-firstLocTime)+"s" );
+		public long duration() {
+			return this.lastLoc().time - this.firstLoc().time;
+		}
+
+		private Location firstLoc() {
+			if( this.getLegCount()<1 ){
+				return null;
+			}
 			
-			// TODO Auto-generated method stub
-			return 0;
+			Leg firstLeg = this.legs.get(0);
+			return firstLeg.getLocation(0);
+		}
+
+		private Location lastLoc() {
+			if( this.getLegCount()<1 ){
+				return null;
+			}
+			
+			Leg lastLeg = this.legs.get(this.legs.size()-1);
+			return lastLeg.getLocation(lastLeg.locs.size()-1);
 		}
 
 		public int getLegCount() {

@@ -4,9 +4,6 @@ package edu.mit.media.wideworld;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.osmdroid.ResourceProxy;
 import org.osmdroid.tileprovider.tilesource.ITileSource;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
@@ -18,7 +15,6 @@ import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.overlay.PathOverlay;
 
-import edu.mit.media.wideworld.RouteServer.Response;
 import edu.mit.media.wideworld.RouteServer.Response.Leg;
 import edu.mit.media.wideworld.RouteServer.Response.Location;
 import edu.mit.media.wideworld.constants.OpenStreetMapConstants;
