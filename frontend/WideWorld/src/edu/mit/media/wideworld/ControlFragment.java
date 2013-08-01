@@ -6,6 +6,7 @@ import java.util.List;
 
 import edu.mit.media.wideworld.MainActivity.TerminusManager;
 import edu.mit.media.wideworld.RouteServer.Response.Leg;
+import edu.mit.media.wideworld.RouteServer.Response.Location;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -518,10 +519,15 @@ public class ControlFragment extends Fragment {
 			
 			if(leg.type==Leg.TYPE_TRANSIT){
 				legTitle.setText("TRANSIT");
+				legDetails.setText( leg.routeShortName+":"+leg.routeLongName );
 			} else if(leg.type==Leg.TYPE_WALK && leg.mode==Leg.MODE_WALK){
 				legTitle.setText("WALK");
+				legDetails.setText( "~"+leg.duration()/60+" mins" );
 			} else if(leg.type==Leg.TYPE_WALK && leg.mode==Leg.MODE_BIKESHARE){
 				legTitle.setText("BIKESHARE");
+				Location startLoc = leg.getLocation(0);
+				Location endLoc = leg.getLocation(leg.getLocationCount()-1);
+				legDetails.setText( startLoc.bikeshare.name+" ("+startLoc.bikeshare.bikes+" bikes) to "+endLoc.bikeshare.name+" ("+endLoc.bikeshare.docks+" docks); ~"+leg.duration()/60+" mins" );
 			}
 			
 			narrativeContainer.addView(legDiv);

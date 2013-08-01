@@ -61,6 +61,8 @@ public class RouteServer {
 			int type=TYPE_NONE;
 			int mode=MODE_NONE;
 			List<Location> locs;
+			String routeShortName=null;
+			String routeLongName=null;
 
 			public Leg(JSONObject jsonLeg) throws JSONException {
 				locs = new ArrayList<Location>();
@@ -81,6 +83,13 @@ public class RouteServer {
 					}
 				}
 				
+				if(jsonLeg.has("route_short_name")){
+					routeShortName = jsonLeg.getString("route_short_name");
+				}
+				if(jsonLeg.has("route_long_name")){
+					routeLongName = jsonLeg.getString("route_long_name");
+				}
+				
 				JSONArray leg_locs = jsonLeg.getJSONArray("locs");
 				for(int i=0; i<leg_locs.length(); i++){
 					JSONObject jsonLoc = leg_locs.getJSONObject(i);
@@ -96,18 +105,41 @@ public class RouteServer {
 			public Location getLocation(int i) {
 				return this.locs.get(i);
 			}
+
+			public long duration() {
+				return this.getLocation(this.getLocationCount()-1).time - this.getLocation(0).time;
+			}
 			
+		}
+		
+		class Bikeshare {
+			int docks;
+			int bikes;
+			String name;
+			
+			Bikeshare(JSONObject obj) throws JSONException{
+				docks = obj.getInt("docks");
+				bikes = obj.getInt("bikes");
+				name = obj.getString("name");
+			}
 		}
 		
 		class Location{
 			double lat;
 			double lon;
 			long time;
+			Bikeshare bikeshare;
 			
 			public Location(JSONObject jsonLoc) throws JSONException {
 				lon = jsonLoc.getDouble("lon");
 				lat = jsonLoc.getDouble("lat");
 				time = jsonLoc.getInt("time");
+				
+				if(jsonLoc.has("bikeshare")){
+					bikeshare = new Bikeshare(jsonLoc.getJSONObject("bikeshare"));
+				} else {
+					bikeshare = null;
+				}
 			}
 			
 		}
@@ -195,11 +227,17 @@ public class RouteServer {
 				        response.getEntity().writeTo(out);
 				        out.close();
 				        String responseString = out.toString();
+				        Log.v("DEBUG", responseString );
 				        
-				        JSONObject object = (JSONObject) new JSONTokener(responseString).nextValue();
-				        Response resp = new Response(object);
-				        
-				        return resp;
+				        Object nextValue = new JSONTokener(responseString).nextValue();
+				        if( nextValue.getClass() == String.class ){
+				        	Log.v("DEBUG", "response is "+(String)nextValue );
+				        	return null;
+				        } else if( nextValue.getClass() == JSONObject.class ) {
+					        Response resp = new Response((JSONObject)nextValue);
+					        
+					        return resp;
+				        }
 				        
 				    } else{
 				        //Closes the connection.
