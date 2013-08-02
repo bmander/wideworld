@@ -513,21 +513,40 @@ public class ControlFragment extends Fragment {
 		for(int i=0; i<top.routeResponse.getLegCount(); i++){
 			Leg leg = top.routeResponse.getLeg(i);
 			
-			LinearLayout legDiv = (LinearLayout) getActivity().getLayoutInflater().inflate( R.layout.leg, narrativeContainer, false );
-			TextView legTitle = (TextView) legDiv.findViewById(R.id.title);
-			TextView legDetails = (TextView) legDiv.findViewById(R.id.details);
+			View legDiv;
+
 			
 			if(leg.type==Leg.TYPE_TRANSIT){
+				legDiv = (LinearLayout) getActivity().getLayoutInflater().inflate( R.layout.leg, narrativeContainer, false );
+				TextView legTitle = (TextView) legDiv.findViewById(R.id.title);
+				TextView legDetails = (TextView) legDiv.findViewById(R.id.details);
+				
 				legTitle.setText("TRANSIT");
 				legDetails.setText( leg.routeShortName+":"+leg.routeLongName );
 			} else if(leg.type==Leg.TYPE_WALK && leg.mode==Leg.MODE_WALK){
+				legDiv = (LinearLayout) getActivity().getLayoutInflater().inflate( R.layout.leg, narrativeContainer, false );
+				TextView legTitle = (TextView) legDiv.findViewById(R.id.title);
+				TextView legDetails = (TextView) legDiv.findViewById(R.id.details);
+				
 				legTitle.setText("WALK");
 				legDetails.setText( "~"+leg.duration()/60+" mins" );
 			} else if(leg.type==Leg.TYPE_WALK && leg.mode==Leg.MODE_BIKESHARE){
-				legTitle.setText("BIKESHARE");
+				legDiv = (LinearLayout) getActivity().getLayoutInflater().inflate( R.layout.bikeshare_leg, narrativeContainer, false );
+				TextView bikeCountText = (TextView) legDiv.findViewById(R.id.bike_count_text);
+				TextView dockCountText = (TextView) legDiv.findViewById(R.id.dock_count_text);
+				TextView originName = (TextView) legDiv.findViewById(R.id.origin_name);
+				TextView destName = (TextView) legDiv.findViewById(R.id.dest_name);
+				TextView legDuration = (TextView) legDiv.findViewById(R.id.leg_duration);
+		
 				Location startLoc = leg.getLocation(0);
 				Location endLoc = leg.getLocation(leg.getLocationCount()-1);
-				legDetails.setText( startLoc.bikeshare.name+" ("+startLoc.bikeshare.bikes+" bikes) to "+endLoc.bikeshare.name+" ("+endLoc.bikeshare.docks+" docks); ~"+leg.duration()/60+" mins" );
+				bikeCountText.setText( ""+startLoc.bikeshare.bikes );
+				dockCountText.setText( ""+endLoc.bikeshare.docks );
+				originName.setText( startLoc.bikeshare.name );
+				destName.setText( endLoc.bikeshare.name );
+				legDuration.setText( ""+leg.duration()/60 );
+			} else {
+				continue;
 			}
 			
 			narrativeContainer.addView(legDiv);
