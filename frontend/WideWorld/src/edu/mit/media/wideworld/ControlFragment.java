@@ -22,6 +22,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -517,19 +518,41 @@ public class ControlFragment extends Fragment {
 
 			
 			if(leg.type==Leg.TYPE_TRANSIT){
-				legDiv = (LinearLayout) getActivity().getLayoutInflater().inflate( R.layout.leg, narrativeContainer, false );
-				TextView legTitle = (TextView) legDiv.findViewById(R.id.title);
-				TextView legDetails = (TextView) legDiv.findViewById(R.id.details);
+				legDiv = (LinearLayout) getActivity().getLayoutInflater().inflate( R.layout.transit_leg, narrativeContainer, false );
+				TextView originName = (TextView) legDiv.findViewById(R.id.origin_name);
+				TextView destName = (TextView) legDiv.findViewById(R.id.dest_name);
+				TextView legDuration = (TextView) legDiv.findViewById(R.id.leg_duration);
+				TextView originTime = (TextView) legDiv.findViewById(R.id.origin_time);
+				TextView destTime = (TextView) legDiv.findViewById(R.id.dest_time);
+				TextView routeName = (TextView) legDiv.findViewById(R.id.route_name);
 				
-				legTitle.setText("TRANSIT");
-				legDetails.setText( leg.routeShortName+":"+leg.routeLongName );
+				Location startLoc = leg.getLocation(0);
+				Location endLoc = leg.getLocation(leg.getLocationCount()-1);
+				
+				originName.setText( startLoc.stopName );
+				destName.setText( endLoc.stopName );
+				routeName.setText( ""+leg.getRouteName() );
+				legDuration.setText( ""+leg.duration()/60 );
+				
+				java.text.DateFormat df = DateFormat.getTimeFormat(getActivity());
+				String startTime = df.format(startLoc.getTimeAsDate());
+				String endTime = df.format(endLoc.getTimeAsDate());
+				originTime.setText( startTime );
+				destTime.setText( endTime );
+
 			} else if(leg.type==Leg.TYPE_WALK && leg.mode==Leg.MODE_WALK){
-				legDiv = (LinearLayout) getActivity().getLayoutInflater().inflate( R.layout.leg, narrativeContainer, false );
-				TextView legTitle = (TextView) legDiv.findViewById(R.id.title);
-				TextView legDetails = (TextView) legDiv.findViewById(R.id.details);
+				legDiv = (LinearLayout) getActivity().getLayoutInflater().inflate( R.layout.walking_leg, narrativeContainer, false );
+				TextView originName = (TextView) legDiv.findViewById(R.id.origin_name);
+				TextView destName = (TextView) legDiv.findViewById(R.id.dest_name);
+				TextView legDuration = (TextView) legDiv.findViewById(R.id.leg_duration);
 				
-				legTitle.setText("WALK");
-				legDetails.setText( "~"+leg.duration()/60+" mins" );
+				Location startLoc = leg.getLocation(0);
+				Location endLoc = leg.getLocation(leg.getLocationCount()-1);
+				//originName.setText( String.format("%0.2f",startLoc.lat)+", "+String.format("%0.2f",startLoc.lon) );
+				//destName.setText( String.format("%0.2f",endLoc.lat)+", "+String.format("%0.2f",endLoc.lon) );
+				originName.setText( startLoc.lat+", "+startLoc.lon );
+				destName.setText( endLoc.lat+", "+endLoc.lon );
+				legDuration.setText( ""+leg.duration()/60 );
 			} else if(leg.type==Leg.TYPE_WALK && leg.mode==Leg.MODE_BIKESHARE){
 				legDiv = (LinearLayout) getActivity().getLayoutInflater().inflate( R.layout.bikeshare_leg, narrativeContainer, false );
 				TextView bikeCountText = (TextView) legDiv.findViewById(R.id.bike_count_text);

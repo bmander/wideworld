@@ -17,7 +17,7 @@
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
 	        android:gravity="center"
-	        android:text="BIKESHARE"
+	        android:text="TRANSIT"
 	        android:textSize="10dp"
 	        android:background="@drawable/back"
 	        android:padding="3dp" >
@@ -38,13 +38,36 @@
     </LinearLayout>
     <LinearLayout
         android:orientation="vertical"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_width="match_parent"
         android:background="@drawable/back">
 
-	    <RelativeLayout
+	   <RelativeLayout
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
+	        android:layout_weight="1" >
+
+	        <TextView
+	            android:id="@+id/route_name"
+	            android:layout_centerVertical="true"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_alignParentLeft="true"
+	            android:singleLine="true"
+	            android:text="Fake Route Name"
+	            android:paddingLeft="10dp"
+	            android:paddingRight="10dp" />
+
+	    </RelativeLayout>
+
+	    <ImageView
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:src="@drawable/line" />
+        
+	   <RelativeLayout
+	        android:layout_width="wrap_content"
+	        android:layout_height="30dp"
 	        android:layout_weight="1" >
 
 	        <TextView
@@ -52,40 +75,29 @@
 	            android:layout_centerVertical="true"
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
-	            android:text="MIT Vassar St/Main St"
+	            android:layout_toLeftOf="@+id/origin_time"
+	            android:layout_alignParentLeft="true"
+	            android:text="Kendall/MIT Station - Outbound"
+	            android:ellipsize="end"
+	            android:singleLine="true"
 	            android:paddingLeft="10dp" />
 	        
-	        <ImageView
+
+
+	        			<ImageView
 	            android:layout_width="wrap_content"
 	            android:layout_height="match_parent"
-	            android:layout_toLeftOf="@+id/bike_count"
+	            android:layout_toLeftOf="@+id/origin_time"
 	            android:src="@drawable/line" />
-
-	        <LinearLayout
-	            android:id="@+id/bike_count"
-	            android:orientation="vertical"
-	            android:layout_width="40dp"
-	            android:layout_height="match_parent"
-	            android:layout_alignParentRight="true"
-	            android:gravity="center_horizontal">
-
 	            <TextView
-	                android:id="@+id/bike_count_text"
-	                android:layout_width="wrap_content"
-	                android:layout_height="wrap_content" 
-	                android:text="1"
-	                android:textSize="20dp"
-	                android:padding="3dp"
-	                android:layout_weight="1"/>
-
-	            <TextView
-	                android:layout_width="wrap_content"
-	                android:layout_height="wrap_content"
-	                android:text="bikes"
-	                android:padding="1dp"
-	                android:textSize="10dp" />
-
-	        </LinearLayout>
+	                android:id="@+id/origin_time"
+	            	android:layout_width="45dp"
+	            	android:layout_height="wrap_content"
+	                android:layout_centerVertical="true"
+	                android:layout_alignParentRight="true"
+	                android:text="12:55"
+	                android:gravity="center"
+	                android:textSize="15dp" />
 
 	    </RelativeLayout>
 
@@ -96,50 +108,38 @@
 
 	    <RelativeLayout
 	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
+	        android:layout_height="30dp"
 	        android:layout_weight="1" >
 
 	        <TextView
 	            android:id="@+id/dest_name"
-	            android:layout_centerVertical="true"
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
-	            android:text="Lechmore Station at C..."
-	            android:paddingLeft="10dp" />
-	        
-	        <ImageView
+	            android:layout_centerVertical="true"
+	            android:paddingLeft="10dp"
+	            android:layout_toLeftOf="@+id/dest_time"
+	            android:layout_alignParentLeft="true"
+	            android:ellipsize="end"
+	            android:singleLine="true"
+	            android:text="Porter Sq - Outbound" />
+			<ImageView
 	            android:layout_width="wrap_content"
 	            android:layout_height="match_parent"
-	            android:layout_toLeftOf="@+id/dock_count"
+	            android:layout_toLeftOf="@+id/dest_time"
 	            android:src="@drawable/line" />
 
-	        <LinearLayout
-	            android:id="@+id/dock_count"
-	            android:orientation="vertical"
-	            android:layout_width="40dp"
-	            android:layout_height="match_parent"
-	            android:layout_alignParentRight="true"
-	            android:gravity="center_horizontal">
-
 	            <TextView
-	                android:id="@+id/dock_count_text"
-	                android:layout_width="wrap_content"
-	                android:layout_height="wrap_content" 
-	                android:text="9"
-	                android:textSize="20dp"
-	                android:padding="3dp"
-	                android:layout_weight="1"/>
-
-	            <TextView
-	                android:layout_width="wrap_content"
-	                android:layout_height="wrap_content"
-	                android:text="docks"
-	                android:padding="1dp"
-	                android:textSize="10dp" />
-
-	        </LinearLayout>
+	                android:id="@+id/dest_time"
+	            	android:layout_width="45dp"
+	            	android:layout_height="wrap_content"
+	                android:layout_centerVertical="true"
+	                android:layout_alignParentRight="true"
+	                android:text="1:25"
+	                android:gravity="center"
+	                android:textSize="15dp" />
 
 	    </RelativeLayout>
+
     </LinearLayout>
 
 

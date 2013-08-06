@@ -11,6 +11,7 @@
         <item>Average</item>
         <item>Faster</item>
     </string-array>
-    <string name="go_text">Go!</string>
+    <string name="go_text">Get route</string>
     <string name="use_gps_alt_text">Use GPS</string>
+    <string name="blank_directions_filler">Directions show up here</string>
 </resources>

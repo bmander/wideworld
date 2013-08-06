@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
@@ -110,6 +111,17 @@ public class RouteServer {
 				return this.getLocation(this.getLocationCount()-1).time - this.getLocation(0).time;
 			}
 			
+			public String getRouteName(){
+				if( routeShortName!=null && !routeShortName.equals("") && routeLongName!=null && !routeLongName.equals("")){
+					return routeShortName+": "+routeLongName;
+				} else if(routeShortName!=null && !routeShortName.equals("")){
+					return routeShortName;
+				} else if(routeLongName!=null && !routeLongName.equals("")){
+					return routeLongName;
+				}
+				return null;
+			}
+			
 		}
 		
 		class Bikeshare {
@@ -129,11 +141,16 @@ public class RouteServer {
 			double lon;
 			long time;
 			Bikeshare bikeshare;
+			String stopName=null;
 			
 			public Location(JSONObject jsonLoc) throws JSONException {
 				lon = jsonLoc.getDouble("lon");
 				lat = jsonLoc.getDouble("lat");
 				time = jsonLoc.getInt("time");
+				
+				if(jsonLoc.has("stop_name")){
+					stopName = jsonLoc.getString("stop_name");
+				}
 				
 				if(jsonLoc.has("bikeshare")){
 					bikeshare = new Bikeshare(jsonLoc.getJSONObject("bikeshare"));
@@ -141,6 +158,12 @@ public class RouteServer {
 					bikeshare = null;
 				}
 			}
+			
+			public Date getTimeAsDate(){
+				Date ret=new Date((long)time*1000);
+				return ret;
+			}
+			
 			
 		}
 		
