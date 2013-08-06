@@ -506,7 +506,7 @@ public class ControlFragment extends Fragment {
 	}
 
 	public void finishGetRoute() {
-		((Button)getView().findViewById(R.id.go_button)).setText("go!");
+		((Button)getView().findViewById(R.id.go_button)).setText(getString(R.string.go_text));
 		
 		LinearLayout narrativeContainer = (LinearLayout) getView().findViewById(R.id.narrative_container);
 		narrativeContainer.removeAllViews();
@@ -548,8 +548,6 @@ public class ControlFragment extends Fragment {
 				
 				Location startLoc = leg.getLocation(0);
 				Location endLoc = leg.getLocation(leg.getLocationCount()-1);
-				//originName.setText( String.format("%0.2f",startLoc.lat)+", "+String.format("%0.2f",startLoc.lon) );
-				//destName.setText( String.format("%0.2f",endLoc.lat)+", "+String.format("%0.2f",endLoc.lon) );
 				originName.setText( startLoc.lat+", "+startLoc.lon );
 				destName.setText( endLoc.lat+", "+endLoc.lon );
 				legDuration.setText( ""+leg.duration()/60 );
