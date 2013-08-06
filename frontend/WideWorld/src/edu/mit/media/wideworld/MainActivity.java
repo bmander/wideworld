@@ -173,6 +173,8 @@ public class MainActivity extends FragmentActivity
         	dest.desc = destDesc;
         	
         	bike_speed = savedInstanceState.getDouble("bikeSpeed");
+        	
+        	useTransit = savedInstanceState.getBoolean("useTransit");
         }
         
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -291,6 +293,9 @@ public class MainActivity extends FragmentActivity
     	
     	// but biking speed into state
     	outState.putDouble("bikeSpeed", bike_speed);
+    	
+    	// but transit preference into state
+    	outState.putBoolean("useTransit", useTransit);
     }
     
     @Override
