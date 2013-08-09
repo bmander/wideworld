@@ -34,19 +34,21 @@ public class RouteServer {
 		public double lat2;
 		public double lng2;
 		public boolean useTransit;
+		public boolean useBikeshare;
 		public double bikeSpeed;
 		
-		Request(double lat12, double lng12, double lat22, double lng22, boolean useTransit, double bikeSpeed){
+		Request(double lat12, double lng12, double lat22, double lng22, boolean useTransit, boolean useBikeshare, double bikeSpeed){
 			this.lat1=lat12;
 			this.lng1=lng12;
 			this.lat2=lat22;
 			this.lng2=lng22;
 			this.useTransit = useTransit;
+			this.useBikeshare = useBikeshare;
 			this.bikeSpeed = bikeSpeed;
 		}
 		
 		Request(double lat12, double lng12, double lat22, double lng22){
-			this(lat12,lng12,lat22,lng22,true,2.0);
+			this(lat12,lng12,lat22,lng22,true,true,2.0);
 		}
 	}
 	
@@ -290,7 +292,7 @@ public class RouteServer {
 			}
 			
 		}
-		String url = "http://"+this.host+"/"+this.instance+"/plan?lat1="+request.lat1+"&lon1="+request.lng1+"&lat2="+request.lat2+"&lon2="+request.lng2+"&bspeed="+request.bikeSpeed+"&transit="+(request.useTransit?"t":"f");
+		String url = "http://"+this.host+"/"+this.instance+"/plan?lat1="+request.lat1+"&lon1="+request.lng1+"&lat2="+request.lat2+"&lon2="+request.lng2+"&bspeed="+request.bikeSpeed+"&transit="+(request.useTransit?"t":"f")+"&bikeshare="+(request.useBikeshare?"t":"f");
 		Log.v("DEBUG", url);
 		FetchRouteTask rt = new FetchRouteTask();
 		rt.execute(url);

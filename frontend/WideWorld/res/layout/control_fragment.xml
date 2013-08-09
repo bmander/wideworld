@@ -183,6 +183,15 @@
         android:layout_below="@+id/dest_text"
         android:onClick="onCheckboxClicked"
         android:text="@string/checkbox_usetransit" />
+    
+	<CheckBox
+        android:id="@+id/checkbox_usebikeshare"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/dest_text"
+        android:layout_toRightOf="@+id/checkbox_usetransit"
+        android:onClick="onBikeshareCheckboxClicked"
+        android:text="@string/checkbox_usebikeshare" />
 
     <ListView
         android:id="@+id/orig_dropdown"
@@ -245,6 +254,8 @@
         android:layout_height="wrap_content"
          />
     </LinearLayout>
+
+    
 
 </RelativeLayout>
 

@@ -137,6 +137,7 @@ public class MainActivity extends FragmentActivity
     RouteServer routeServer;
 	
 	boolean useTransit;
+	boolean useBikeshare;
 	TerminusManager orig;
 	TerminusManager dest;
 	
@@ -181,6 +182,10 @@ public class MainActivity extends FragmentActivity
         	bike_speed = savedInstanceState.getDouble("bikeSpeed");
         	
         	useTransit = savedInstanceState.getBoolean("useTransit");
+        	useBikeshare = savedInstanceState.getBoolean("useBikeshare");
+        } else {
+        	useTransit = true;
+        	useBikeshare = true;
         }
         
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -302,6 +307,7 @@ public class MainActivity extends FragmentActivity
     	
     	// but transit preference into state
     	outState.putBoolean("useTransit", useTransit);
+    	outState.putBoolean("useBikeshare", useBikeshare);
     }
     
     @Override
@@ -327,6 +333,10 @@ public class MainActivity extends FragmentActivity
 	    this.useTransit = ((CheckBox) view).isChecked();
 	    	    
 	}
+	
+	public void onBikeshareCheckboxClicked(View view){
+		this.useBikeshare = ((CheckBox) view).isChecked();
+	}
 
 
 	protected void findAndDisplayRoute() {		
@@ -348,7 +358,7 @@ public class MainActivity extends FragmentActivity
 		Log.v("DEBUG", "start get route...");
 		this.startGetRoute();
 		final Activity superthis = this;
-		this.routeServer.getRoute(this.routeServer.new Request(lat1, lng1, lat2, lng2, useTransit, bike_speed), new RouteServer.FetchRouteCallback(){
+		this.routeServer.getRoute(this.routeServer.new Request(lat1, lng1, lat2, lng2, useTransit, useBikeshare, bike_speed), new RouteServer.FetchRouteCallback(){
 			public void onResponse(RouteServer.Response resp){
 				routeResponse = resp;
 				finishGetRoute();

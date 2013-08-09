@@ -488,9 +488,11 @@ public class ControlFragment extends Fragment {
 		RelativeLayout d_lozenge = (RelativeLayout)fragView.findViewById( R.id.dest_lozenge );
 		dest = new LocationPicker( activity.dest, d_working, d_dropdown, d_text, d_button, d_lozenge );
 				
-		// "use transit" checkbox
+		// mode checkboxes
         CheckBox use_transit = (CheckBox)fragView.findViewById(R.id.checkbox_usetransit);
         use_transit.setChecked( activity.useTransit );
+        CheckBox use_bikeshare = (CheckBox)fragView.findViewById(R.id.checkbox_usebikeshare);
+        use_bikeshare.setChecked( activity.useBikeshare );
         
         // set up speed spinner
         Spinner spinner = (Spinner) fragView.findViewById(R.id.speed_spinner);
