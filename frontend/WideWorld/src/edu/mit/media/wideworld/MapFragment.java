@@ -28,6 +28,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.os.Build;
@@ -177,6 +178,8 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
     	removeOriginIcon();
     	
     	OverlayItem originIcon = new OverlayItem("origin", "origin", pt);
+    	Resources res = top.getResources();
+    	originIcon.setMarker( res.getDrawable( R.drawable.startmarker ) );
     	List<OverlayItem> icons = new ArrayList<OverlayItem>();
     	icons.add( originIcon );
     	origOverlay = new ItemizedIconOverlay<OverlayItem>(this.getActivity(), icons, new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
@@ -210,6 +213,8 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
     	removeDestinationIcon();
     	
     	OverlayItem destIcon = new OverlayItem("destination", "destination", pt);
+    	Resources res = top.getResources();
+    	destIcon.setMarker( res.getDrawable( R.drawable.stopmarker ) );
     	List<OverlayItem> icons = new ArrayList<OverlayItem>();
     	icons.add( destIcon );
     	destOverlay = new ItemizedIconOverlay<OverlayItem>(this.getActivity(), icons, new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
