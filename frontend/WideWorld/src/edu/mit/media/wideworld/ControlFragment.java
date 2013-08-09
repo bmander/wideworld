@@ -1,6 +1,11 @@
 package edu.mit.media.wideworld;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,7 +71,34 @@ public class ControlFragment extends Fragment {
 		}
 		
 		List<Address> geocodeWithinArea(String loc, int maxResults, double bottom, double left, double top, double right ) throws IOException {
+			URL url = null;
+			try {
+				url = new URL("http://example.com/");
+			} catch (MalformedURLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+	        HttpURLConnection urlConnection = null;
+			try {
+				urlConnection = (HttpURLConnection) url.openConnection();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+	        try {
+	          InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+	          Log.v( "DEBUG", "available bytes:"+in.available() );
+	          urlConnection.disconnect();
+	        } catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 			List<Address> prefilter = geocoder.getFromLocationName(loc, maxResults, bottom, left, top, right);
+			Log.v("DEBUG", "size:"+prefilter.size());
 
 			List<Address> postfilter = new ArrayList<Address>();
 			for( int i=0; i<prefilter.size(); i++){
@@ -510,6 +542,10 @@ public class ControlFragment extends Fragment {
 		
 		LinearLayout narrativeContainer = (LinearLayout) getView().findViewById(R.id.narrative_container);
 		narrativeContainer.removeAllViews();
+		
+		if( top.routeResponse == null ){
+			return;
+		}
 		
 		for(int i=0; i<top.routeResponse.getLegCount(); i++){
 			Leg leg = top.routeResponse.getLeg(i);

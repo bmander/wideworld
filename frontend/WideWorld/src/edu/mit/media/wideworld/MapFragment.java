@@ -5,8 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.osmdroid.ResourceProxy;
+import org.osmdroid.ResourceProxy.string;
+import org.osmdroid.tileprovider.MapTile;
 import org.osmdroid.tileprovider.tilesource.ITileSource;
+import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
+import org.osmdroid.tileprovider.tilesource.XYTileSource;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.ItemizedIconOverlay;
@@ -75,6 +79,10 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         mResourceProxy = new ResourceProxyImpl(inflater.getContext().getApplicationContext());
         mMapView = new MapView(inflater.getContext(), 256, mResourceProxy);
         
+        XYTileSource ww_tiles = new XYTileSource("WWTiles", null, 10, 18, 256, ".png",
+                                "http://wideworld.media.mit.edu:8888/v2/boston/");
+        mMapView.setTileSource( ww_tiles );
+        
         mMapView.setUseSafeCanvas(true);
         setHardwareAccelerationOff();
         
@@ -138,7 +146,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
     public void onPause()
     {
         final SharedPreferences.Editor edit = mPrefs.edit();
-        edit.putString(PREFS_TILE_SOURCE, mMapView.getTileProvider().getTileSource().name());
+        //edit.putString(PREFS_TILE_SOURCE, mMapView.getTileProvider().getTileSource().name());
         edit.putInt(PREFS_SCROLL_X, mMapView.getScrollX());
         edit.putInt(PREFS_SCROLL_Y, mMapView.getScrollY());
         edit.putInt(PREFS_ZOOM_LEVEL, mMapView.getZoomLevel());
@@ -156,13 +164,13 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         
         locOverlay.enableMyLocation();
         
-        final String tileSourceName = mPrefs.getString(PREFS_TILE_SOURCE,
-                TileSourceFactory.DEFAULT_TILE_SOURCE.name());
-        try {
-            final ITileSource tileSource = TileSourceFactory.getTileSource(tileSourceName);
-            mMapView.setTileSource(tileSource);
-        } catch (final IllegalArgumentException ignore) {
-        }
+//        final String tileSourceName = mPrefs.getString(PREFS_TILE_SOURCE,
+//                TileSourceFactory.DEFAULT_TILE_SOURCE.name());
+//        try {
+//            final ITileSource tileSource = TileSourceFactory.getTileSource(tileSourceName);
+//            mMapView.setTileSource(tileSource);
+//        } catch (final IllegalArgumentException ignore) {
+//        }
     }
     
     public void setOriginIcon(GeoPoint pt){
