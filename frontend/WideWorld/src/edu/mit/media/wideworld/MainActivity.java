@@ -138,6 +138,8 @@ public class MainActivity extends FragmentActivity
 	
 	boolean useTransit;
 	boolean useBikeshare;
+	int curCity=0;
+	CityInstance cities[] = null;
 	TerminusManager orig;
 	TerminusManager dest;
 	
