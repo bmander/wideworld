@@ -1,13 +1,9 @@
 package edu.mit.media.wideworld;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
@@ -17,10 +13,6 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -28,7 +20,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.preference.DialogPreference;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
@@ -154,13 +145,13 @@ public class CityGetterPreference extends DialogPreference{
 	    	} else {	    		
 
 	    		String citiesJSON = (String)msg.obj;
-	    		List<CityInstance> cities = cgprefs.getInstances(citiesJSON);
+	    		List<CityInstance> cities = CitiesFile.getInstances(citiesJSON);
 	    		
 	    		if( cities!=null ){
 	    			cgprefs.showCitiesList(cities);
 	    		}
 	    			
-				cgprefs.saveInstancesJSON(citiesJSON);
+	    		CitiesFile.saveInstancesJSON(cgprefs.getContext(), citiesJSON);
 				
 	    	}
 		    	
@@ -186,9 +177,9 @@ public class CityGetterPreference extends DialogPreference{
         
         setDialogIcon(null);
         
-		String citiesJSON = getInstancesJSON(getContext());
+		String citiesJSON = CitiesFile.getInstancesJSON(getContext());
 		if( citiesJSON!=null ){
-			cities = getInstances(citiesJSON);
+			cities = CitiesFile.getInstances(citiesJSON);
 		}
     }
 	
@@ -218,69 +209,6 @@ public class CityGetterPreference extends DialogPreference{
 		}
 		
 		this.cities = cities;
-	}
-
-	private String getInstancesJSON(Context context) {
-		try {
-			FileInputStream instancesFile = context.openFileInput("instances.json");
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			while(true){
-				int bb = instancesFile.read();
-				if(bb==-1){
-					break;
-				}
-				bos.write(bb);
-			}
-			String instancesJSON = bos.toString();
-			return instancesJSON;
-		} catch (FileNotFoundException e) {
-			// normal occurrence when instances.json has not been written before
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
-	List<CityInstance> getInstances(String instanceJSON){
-		try {	
-	
-			List<CityInstance> ret = new ArrayList<CityInstance>();
-	        Object nextValue = new JSONTokener(instanceJSON).nextValue();
-	        
-	        if( nextValue.getClass() == String.class ){
-	        	return null;
-	        } else if( nextValue.getClass() == JSONArray.class ) {
-	        	JSONArray jsonInstances = (JSONArray)nextValue;
-	        	for(int i=0; i<jsonInstances.length(); i++){
-	        		JSONObject jsonObj;
-	
-					jsonObj = jsonInstances.getJSONObject(i);
-	
-	        		CityInstance inst = CityInstance.fromJSON( jsonObj );
-	        		ret.add( inst );
-	        	}
-		        return ret;
-	        } else {
-	        	return null;
-	        }
-        
-		} catch (JSONException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-	
-	private void saveInstancesJSON(String instancesJSON) {
-		try {
-			FileOutputStream fos;
-			fos = getContext().openFileOutput("instances.json", Context.MODE_PRIVATE);
-			fos.write(instancesJSON.getBytes());
-			fos.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 	
 	@Override
