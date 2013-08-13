@@ -313,10 +313,17 @@ public class CityGetterPreference extends DialogPreference{
 	@Override
 	protected void onDialogClosed(boolean positiveResult) {
 
-	    if(!positiveResult)
+	    if(!positiveResult){
+	    	// If 'bos' is the city preference, someone clicks on the city-picker, selects 'nyc',
+	    	// and then hits cancel, if they immediately re-open the city-picker it should show 'bos',
+	    	// not 'nyc'.
+	    	clickedPrefix = this.getPersistedString(null);
 	        return;
+	    }
 
 	    this.persistString(clickedPrefix);
+	    
+	    setSummaryToCityName();
 
 	    super.onDialogClosed(positiveResult);
 	}
@@ -325,11 +332,26 @@ public class CityGetterPreference extends DialogPreference{
 	protected void onSetInitialValue(boolean restorePersistedValue, Object defaultValue) {
 	    if (restorePersistedValue) {
 	        clickedPrefix = this.getPersistedString(null);
+	        
+	        setSummaryToCityName();
 	    } else {
 	        clickedPrefix = null;
 	    }
 	    
 	    
+	}
+
+	private void setSummaryToCityName() {
+		// sift through json-stored cities for city name
+		if( clickedPrefix!=null & cities!=null ){
+			for(int i=0; i<cities.size(); i++){
+				CityInstance city = cities.get(i);
+				if(city.prefix.equals(clickedPrefix)){
+					this.setSummary(city.city_name);
+					break;
+				}
+			}
+		}
 	}
 
 }
