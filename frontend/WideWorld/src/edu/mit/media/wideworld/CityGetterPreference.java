@@ -130,26 +130,15 @@ public class CityGetterPreference extends DialogPreference{
 		protected Void doInBackground(Void... params) {
 			try {
 				String instancesJSON = this.getInstancesJSON();
-				
-				List<CityInstance> instances;
-				try {
-					if(instancesJSON!=null){
-						instances = getInstances(instancesJSON);
-					} else {
-						instances = null;
-					}
-				} catch (JSONException e) {
-					instances = null;
-				}
 	
-				if( instances == null ){
+				if( instancesJSON == null ){
 					Message msg = new Message();
 					msg.arg1 = GETCITY_FAIL;
 					handler.sendMessage(msg);
 				} else {
 					Message msg = new Message();
 					msg.arg1 = GETCITY_SUCCESS;
-					msg.obj = new HandlerPayload(instancesJSON, instances);
+					msg.obj = instancesJSON;
 					handler.sendMessage(msg);
 				}
 			} catch (IOException e) {
@@ -183,11 +172,16 @@ public class CityGetterPreference extends DialogPreference{
 	    	if( msg.arg1 == GetCitiesTask.GETCITY_FAIL ){
 
 	    	} else {	    		
-	    		HandlerPayload obj = (HandlerPayload)msg.obj;
-	    		cgprefs.showCitiesList(obj.instances);
-	    		
-				cgprefs.saveInstancesJSON(obj.instancesJSON);
 
+	    		String citiesJSON = (String)msg.obj;
+	    		List<CityInstance> cities = cgprefs.getInstances(citiesJSON);
+	    		
+	    		if( cities!=null ){
+	    			cgprefs.showCitiesList(cities);
+	    		}
+	    			
+				cgprefs.saveInstancesJSON(citiesJSON);
+				
 	    	}
 		    	
 	    	cgprefs.progressbar.setVisibility(View.INVISIBLE);
@@ -252,23 +246,34 @@ public class CityGetterPreference extends DialogPreference{
 		return null;
 	}
 	
-	List<CityInstance> getInstances(String instanceJSON) throws JSONException{
-		List<CityInstance> ret = new ArrayList<CityInstance>();
-        Object nextValue = new JSONTokener(instanceJSON).nextValue();
+	List<CityInstance> getInstances(String instanceJSON){
+		try {	
+	
+			List<CityInstance> ret = new ArrayList<CityInstance>();
+	        Object nextValue = new JSONTokener(instanceJSON).nextValue();
+	        
+	        if( nextValue.getClass() == String.class ){
+	        	return null;
+	        } else if( nextValue.getClass() == JSONArray.class ) {
+	        	JSONArray jsonInstances = (JSONArray)nextValue;
+	        	for(int i=0; i<jsonInstances.length(); i++){
+	        		JSONObject jsonObj;
+	
+					jsonObj = jsonInstances.getJSONObject(i);
+	
+	        		CityInstance inst = CityInstance.fromJSON( jsonObj );
+	        		ret.add( inst );
+	        	}
+		        return ret;
+	        } else {
+	        	return null;
+	        }
         
-        if( nextValue.getClass() == String.class ){
-        	return null;
-        } else if( nextValue.getClass() == JSONArray.class ) {
-        	JSONArray jsonInstances = (JSONArray)nextValue;
-        	for(int i=0; i<jsonInstances.length(); i++){
-        		JSONObject jsonObj = jsonInstances.getJSONObject(i);
-        		CityInstance inst = CityInstance.fromJSON( jsonObj );
-        		ret.add( inst );
-        	}
-	        return ret;
-        } else {
-        	return null;
-        }
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
 	}
 	
 	private void saveInstancesJSON(String instancesJSON) {
@@ -306,6 +311,12 @@ public class CityGetterPreference extends DialogPreference{
 			}
 
 		});
+		
+		String citiesJSON = getInstancesJSON(getContext());
+		if( citiesJSON!=null ){
+			List<CityInstance> cities = getInstances(citiesJSON);
+			this.showCitiesList(cities);
+		}
 
 	    super.onBindDialogView(view);
 	}
