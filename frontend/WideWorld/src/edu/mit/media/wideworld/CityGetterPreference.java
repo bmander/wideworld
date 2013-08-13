@@ -78,25 +78,7 @@ public class CityGetterPreference extends DialogPreference{
 			this.handler = handler;
 		}
 		
-		List<CityInstance> getInstances(String instanceJSON) throws JSONException{
-			List<CityInstance> ret = new ArrayList<CityInstance>();
-	        Object nextValue = new JSONTokener(instanceJSON).nextValue();
-	        
-	        Log.v("DEBUG", "next value is "+nextValue.toString() );
-	        if( nextValue.getClass() == String.class ){
-	        	return null;
-	        } else if( nextValue.getClass() == JSONArray.class ) {
-	        	JSONArray jsonInstances = (JSONArray)nextValue;
-	        	for(int i=0; i<jsonInstances.length(); i++){
-	        		JSONObject jsonObj = jsonInstances.getJSONObject(i);
-	        		CityInstance inst = CityInstance.fromJSON( jsonObj );
-	        		ret.add( inst );
-	        	}
-		        return ret;
-	        } else {
-	        	return null;
-	        }
-		}
+
 		
 		String getInstancesJSON( ) throws IOException {
 			
@@ -152,7 +134,7 @@ public class CityGetterPreference extends DialogPreference{
 				List<CityInstance> instances;
 				try {
 					if(instancesJSON!=null){
-						instances = this.getInstances(instancesJSON);
+						instances = getInstances(instancesJSON);
 					} else {
 						instances = null;
 					}
@@ -268,6 +250,25 @@ public class CityGetterPreference extends DialogPreference{
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	List<CityInstance> getInstances(String instanceJSON) throws JSONException{
+		List<CityInstance> ret = new ArrayList<CityInstance>();
+        Object nextValue = new JSONTokener(instanceJSON).nextValue();
+        
+        if( nextValue.getClass() == String.class ){
+        	return null;
+        } else if( nextValue.getClass() == JSONArray.class ) {
+        	JSONArray jsonInstances = (JSONArray)nextValue;
+        	for(int i=0; i<jsonInstances.length(); i++){
+        		JSONObject jsonObj = jsonInstances.getJSONObject(i);
+        		CityInstance inst = CityInstance.fromJSON( jsonObj );
+        		ret.add( inst );
+        	}
+	        return ret;
+        } else {
+        	return null;
+        }
 	}
 	
 	private void saveInstancesJSON(String instancesJSON) {
