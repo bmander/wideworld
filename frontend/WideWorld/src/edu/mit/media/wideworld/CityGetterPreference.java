@@ -206,8 +206,6 @@ public class CityGetterPreference extends DialogPreference{
 	    		HandlerPayload obj = (HandlerPayload)msg.obj;
 				List<CityInstance> cities = obj.instances;
 	    		for(int i=0; i<cities.size(); i++){
-	    			Log.v("DEBUG", "city: "+cities.get(i));
-	    			
 	    			RadioButton cityView = new RadioButton(cgprefs.getContext());
 	    			cityView.setLayoutParams( new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT) );
 	    			cityView.setText(cities.get(i).city_name);
@@ -218,24 +216,15 @@ public class CityGetterPreference extends DialogPreference{
 	    		
 	    		cgprefs.cities = cities;
 	    		
-				try {
-		    		FileOutputStream fos;
-					fos = cgprefs.getContext().openFileOutput("instances.json", Context.MODE_PRIVATE);
-		    		fos.write(obj.instancesJSON.getBytes());
-		    		fos.close();
-				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				cgprefs.saveInstancesJSON(obj.instancesJSON);
 
 	    	}
 		    	
 	    	cgprefs.progressbar.setVisibility(View.INVISIBLE);
 			
 	    }
+
+
 	}
 	
     private Button button;
@@ -252,7 +241,12 @@ public class CityGetterPreference extends DialogPreference{
         
         setDialogIcon(null);
         
-        try {
+        String instancesJSON = getInstancesJSON(context);
+        
+    }
+
+	private String getInstancesJSON(Context context) {
+		try {
 			FileInputStream instancesFile = context.openFileInput("instances.json");
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			while(true){
@@ -263,16 +257,30 @@ public class CityGetterPreference extends DialogPreference{
 				bos.write(bb);
 			}
 			String instancesJSON = bos.toString();
-			Log.v("DEBUG", "already have one of these");
-			Log.v("DEBUG", instancesJSON );
+			return instancesJSON;
 		} catch (FileNotFoundException e) {
 			// normal occurrence when instances.json has not been written before
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        
-    }
+		return null;
+	}
+	
+	private void saveInstancesJSON(String instancesJSON) {
+		try {
+			FileOutputStream fos;
+			fos = getContext().openFileOutput("instances.json", Context.MODE_PRIVATE);
+			fos.write(instancesJSON.getBytes());
+			fos.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 	@Override
 	protected void onBindDialogView(View view) {
