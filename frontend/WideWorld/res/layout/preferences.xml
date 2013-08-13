@@ -10,4 +10,8 @@
         android:title="bar"
         android:summary="bar pref"
         android:defaultValue="false" />
+    <edu.mit.media.wideworld.CityGetterPreference
+        android:key="citygetter"
+        android:title="City"
+        android:summary="The City" />
 </PreferenceScreen>

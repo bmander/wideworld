@@ -1,11 +1,15 @@
 package edu.mit.media.wideworld;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
 public class CityInstance implements Parcelable{
-	float[] bbox = new float[4];
-	float[] center = new float[2];
+	double[] bbox = new double[4];
+	double[] center = new double[2];
 	int default_zoom;
 	
 	String bikeshare_url;
@@ -23,8 +27,8 @@ public class CityInstance implements Parcelable{
 	}
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeFloatArray(bbox);
-		dest.writeFloatArray(center);
+		dest.writeDoubleArray(bbox);
+		dest.writeDoubleArray(center);
 		dest.writeInt(default_zoom);
 		dest.writeString(bikeshare_url);
 		dest.writeString(bikeshare_name);
@@ -46,8 +50,8 @@ public class CityInstance implements Parcelable{
 	};
 	
     private CityInstance(Parcel in) {
-        in.readFloatArray(bbox);
-        in.readFloatArray(center);
+        in.readDoubleArray(bbox);
+        in.readDoubleArray(center);
         default_zoom = in.readInt();
         bikeshare_url = in.readString();
         bikeshare_name = in.readString();
@@ -56,4 +60,35 @@ public class CityInstance implements Parcelable{
         city_name = in.readString();
         prefix = in.readString();
     }
+	public CityInstance() {
+	}
+	public static CityInstance fromJSON(JSONObject jsonObj) throws JSONException {
+		CityInstance ret = new CityInstance();
+		
+		JSONArray jsonBbox = jsonObj.getJSONArray("BBOX");
+		ret.bbox[0] = jsonBbox.getDouble(0);
+		ret.bbox[1] = jsonBbox.getDouble(1);
+		ret.bbox[2] = jsonBbox.getDouble(2);
+		ret.bbox[3] = jsonBbox.getDouble(3);
+		
+		JSONArray jsonCenter = jsonObj.getJSONArray("DEFAULT_POINT");
+		ret.center[0] = jsonCenter.getDouble(0);
+		ret.center[1] = jsonCenter.getDouble(1);
+		
+		ret.default_zoom = jsonObj.getInt("DEFAULT_ZOOM");
+		ret.bikeshare_url = jsonObj.getString("BIKESHARE_URL");
+		ret.bikeshare_name = jsonObj.getString("BIKESHARE_NAME");
+		ret.transit_url = jsonObj.getString("TRANSIT_URL");
+		ret.transit_name = jsonObj.getString("TRANSIT_NAME");
+		ret.city_name = jsonObj.getString("CITY_NAME");
+		ret.prefix = jsonObj.getString("PREFIX");
+		
+		return ret;
+		
+	}
+	
+	public String toString(){
+		return "<CityInstance "+prefix+" name="+city_name+">";
+		
+	}
 }
