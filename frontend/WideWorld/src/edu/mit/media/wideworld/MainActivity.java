@@ -1,11 +1,5 @@
 package edu.mit.media.wideworld;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
 
 import org.osmdroid.util.GeoPoint;
@@ -22,11 +16,13 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Address;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -138,12 +134,13 @@ public class MainActivity extends FragmentActivity
 	static final double BIKE_SPEED_AVERAGE = 3.1; // meters/second
 	static final double BIKE_SPEED_FAST = 4.5; // meters/second
 	
+	List<CityInstance> cities = null;
+	CityInstance city = null;
+	
     RouteServer routeServer;
 	
 	boolean useTransit;
 	boolean useBikeshare;
-	int curCity=0;
-	CityInstance cities[] = null;
 	TerminusManager orig;
 	TerminusManager dest;
 	
@@ -160,6 +157,20 @@ public class MainActivity extends FragmentActivity
     public void onCreate(final Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+     
+        /* get the current city */
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        String cityPrefix = sharedPref.getString("citygetter", null);
+        cities = CitiesFile.getInstances(this);
+        if(cityPrefix!=null && cities!=null){
+        	for(int i=0; i<cities.size(); i++){
+        		CityInstance city = cities.get(i);
+        		if(city.prefix.equals(cityPrefix)){
+        			this.city = city;
+        			break;
+        		}
+        	}
+        }
         
         orig = new TerminusManager(this, TerminusManager.ORIG);
         dest = new TerminusManager(this, TerminusManager.DEST);

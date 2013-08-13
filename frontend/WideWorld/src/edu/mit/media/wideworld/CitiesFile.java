@@ -78,4 +78,12 @@ public class CitiesFile {
 			return null;
 		}
 	}
+	
+	public static List<CityInstance> getInstances(Context context) {
+		String str = CitiesFile.getInstancesJSON(context);
+		if( str==null ){
+			return null;
+		}
+		return CitiesFile.getInstances(str);
+	}
 }
