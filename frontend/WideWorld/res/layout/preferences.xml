@@ -12,6 +12,6 @@
         android:defaultValue="false" />
     <edu.mit.media.wideworld.CityGetterPreference
         android:key="citygetter"
-        android:title="City"
-        android:summary="The City" />
+        android:title="Select City"
+        android:summary="None Selected" />
 </PreferenceScreen>

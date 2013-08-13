@@ -1,18 +1,12 @@
 package edu.mit.media.wideworld;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,31 +22,20 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import edu.mit.media.wideworld.ControlFragment.LocationPicker;
-import edu.mit.media.wideworld.RouteServer.Response;
-
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.location.Address;
-import android.location.Geocoder;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.DialogPreference;
-import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
-import android.widget.HeaderViewListAdapter;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.TextView;
 
 public class CityGetterPreference extends DialogPreference{
 	
@@ -112,13 +95,10 @@ public class CityGetterPreference extends DialogPreference{
 			        throw new IOException(statusLine.getReasonPhrase());
 			    }
 			} catch (ClientProtocolException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (URISyntaxException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} 
 			
@@ -195,6 +175,7 @@ public class CityGetterPreference extends DialogPreference{
 	private ProgressBar progressbar;
 	private RadioGroup citylist;
 	public List<CityInstance> cities;
+	String clickedPrefix = null;
 
 	public CityGetterPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -205,8 +186,10 @@ public class CityGetterPreference extends DialogPreference{
         
         setDialogIcon(null);
         
-        String instancesJSON = getInstancesJSON(context);
-        
+		String citiesJSON = getInstancesJSON(getContext());
+		if( citiesJSON!=null ){
+			cities = getInstances(citiesJSON);
+		}
     }
 	
 	public void showCitiesList(List<CityInstance> cities){
@@ -218,7 +201,20 @@ public class CityGetterPreference extends DialogPreference{
 			cityView.setText(cities.get(i).city_name);
 			cityView.setTag(cities.get(i).prefix);
 			cityView.setPadding(5, 10, 10, 5);
+			cityView.setOnClickListener(new OnClickListener(){
+
+				@Override
+				public void onClick(View v) {
+					String prefix = (String)v.getTag();
+					clickedPrefix = prefix;
+				}
+				
+			});
 			citylist.addView(cityView);
+			
+			if(cities.get(i).prefix.equals(clickedPrefix)){
+				citylist.check(cityView.getId());
+			}
 		}
 		
 		this.cities = cities;
@@ -240,7 +236,6 @@ public class CityGetterPreference extends DialogPreference{
 		} catch (FileNotFoundException e) {
 			// normal occurrence when instances.json has not been written before
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -270,7 +265,6 @@ public class CityGetterPreference extends DialogPreference{
 	        }
         
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
 		}
@@ -283,10 +277,8 @@ public class CityGetterPreference extends DialogPreference{
 			fos.write(instancesJSON.getBytes());
 			fos.close();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -305,16 +297,13 @@ public class CityGetterPreference extends DialogPreference{
 
 			@Override
 			public void onClick(View arg0) {
-				Log.v("DEBUG", "get more stuffage");
 				progressbar.setVisibility(View.VISIBLE);
 				new GetCitiesTask(new GetCitiesHandler(cgprefs)).execute();
 			}
 
 		});
 		
-		String citiesJSON = getInstancesJSON(getContext());
-		if( citiesJSON!=null ){
-			List<CityInstance> cities = getInstances(citiesJSON);
+		if( cities!=null ){
 			this.showCitiesList(cities);
 		}
 
@@ -327,9 +316,20 @@ public class CityGetterPreference extends DialogPreference{
 	    if(!positiveResult)
 	        return;
 
-	    // stuff to do when th edialog closes
+	    this.persistString(clickedPrefix);
 
 	    super.onDialogClosed(positiveResult);
+	}
+	
+	@Override
+	protected void onSetInitialValue(boolean restorePersistedValue, Object defaultValue) {
+	    if (restorePersistedValue) {
+	        clickedPrefix = this.getPersistedString(null);
+	    } else {
+	        clickedPrefix = null;
+	    }
+	    
+	    
 	}
 
 }
