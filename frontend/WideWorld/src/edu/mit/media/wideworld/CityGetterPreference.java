@@ -200,21 +200,9 @@ public class CityGetterPreference extends DialogPreference{
 	    	
 	    	if( msg.arg1 == GetCitiesTask.GETCITY_FAIL ){
 
-	    	} else {
-	    		cgprefs.citylist.removeAllViews();
-	    		
+	    	} else {	    		
 	    		HandlerPayload obj = (HandlerPayload)msg.obj;
-				List<CityInstance> cities = obj.instances;
-	    		for(int i=0; i<cities.size(); i++){
-	    			RadioButton cityView = new RadioButton(cgprefs.getContext());
-	    			cityView.setLayoutParams( new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT) );
-	    			cityView.setText(cities.get(i).city_name);
-	    			cityView.setTag(cities.get(i).prefix);
-	    			cityView.setPadding(5, 10, 10, 5);
-	    			cgprefs.citylist.addView(cityView);
-	    		}
-	    		
-	    		cgprefs.cities = cities;
+	    		cgprefs.showCitiesList(obj.instances);
 	    		
 				cgprefs.saveInstancesJSON(obj.instancesJSON);
 
@@ -244,6 +232,21 @@ public class CityGetterPreference extends DialogPreference{
         String instancesJSON = getInstancesJSON(context);
         
     }
+	
+	public void showCitiesList(List<CityInstance> cities){
+		citylist.removeAllViews();
+		
+		for(int i=0; i<cities.size(); i++){
+			RadioButton cityView = new RadioButton(getContext());
+			cityView.setLayoutParams( new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT) );
+			cityView.setText(cities.get(i).city_name);
+			cityView.setTag(cities.get(i).prefix);
+			cityView.setPadding(5, 10, 10, 5);
+			citylist.addView(cityView);
+		}
+		
+		this.cities = cities;
+	}
 
 	private String getInstancesJSON(Context context) {
 		try {
