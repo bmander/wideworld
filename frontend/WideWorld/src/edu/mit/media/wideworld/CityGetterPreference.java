@@ -28,12 +28,14 @@ import edu.mit.media.wideworld.ControlFragment.LocationPicker;
 import edu.mit.media.wideworld.RouteServer.Response;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.DialogPreference;
+import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -50,6 +52,18 @@ import android.widget.TextView;
 
 public class CityGetterPreference extends DialogPreference{
 	
+	class HandlerPayload{
+		String instancesJSON;
+		List<CityInstance> instances;
+		
+		public HandlerPayload(String instancesJSON,
+				List<CityInstance> instances) {
+			this.instancesJSON = instancesJSON;
+			this.instances = instances;
+		}
+
+	}
+	
 	class GetCitiesTask extends AsyncTask<Void,Void,Void> {
 		
 		private static final int GETCITY_SUCCESS = 0;
@@ -60,8 +74,28 @@ public class CityGetterPreference extends DialogPreference{
 			this.handler = handler;
 		}
 		
-		List<CityInstance> getInstances( ) throws IOException {
+		List<CityInstance> getInstances(String instanceJSON) throws JSONException{
 			List<CityInstance> ret = new ArrayList<CityInstance>();
+	        Object nextValue = new JSONTokener(instanceJSON).nextValue();
+	        
+	        Log.v("DEBUG", "next value is "+nextValue.toString() );
+	        if( nextValue.getClass() == String.class ){
+	        	return null;
+	        } else if( nextValue.getClass() == JSONArray.class ) {
+	        	JSONArray jsonInstances = (JSONArray)nextValue;
+	        	for(int i=0; i<jsonInstances.length(); i++){
+	        		JSONObject jsonObj = jsonInstances.getJSONObject(i);
+	        		CityInstance inst = CityInstance.fromJSON( jsonObj );
+	        		ret.add( inst );
+	        	}
+		        return ret;
+	        } else {
+	        	return null;
+	        }
+		}
+		
+		String getInstancesJSON( ) throws IOException {
+			
 			
 			// there's a lot that can go wrong here...
 			try {
@@ -84,21 +118,7 @@ public class CityGetterPreference extends DialogPreference{
 			        response.getEntity().writeTo(out);
 			        out.close();
 			        String responseString = out.toString();
-			        
-			        Object nextValue = new JSONTokener(responseString).nextValue();
-			        
-			        Log.v("DEBUG", "next value is "+nextValue.toString() );
-			        if( nextValue.getClass() == String.class ){
-			        	return null;
-			        } else if( nextValue.getClass() == JSONArray.class ) {
-			        	JSONArray jsonInstances = (JSONArray)nextValue;
-			        	for(int i=0; i<jsonInstances.length(); i++){
-			        		JSONObject jsonObj = jsonInstances.getJSONObject(i);
-			        		CityInstance inst = CityInstance.fromJSON( jsonObj );
-			        		ret.add( inst );
-			        	}
-				        return ret;
-			        }
+			        return responseString;
 			        
 			    } else{
 			        //Closes the connection.
@@ -114,10 +134,7 @@ public class CityGetterPreference extends DialogPreference{
 			} catch (URISyntaxException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			} 
 			
 			return null;
 			
@@ -126,16 +143,22 @@ public class CityGetterPreference extends DialogPreference{
 		@Override
 		protected Void doInBackground(Void... params) {
 			try {
-				List<CityInstance> resp = this.getInstances();
+				String instancesJSON = this.getInstancesJSON();
+				List<CityInstance> instances;
+				try {
+					instances = this.getInstances(instancesJSON);
+				} catch (JSONException e) {
+					instances = null;
+				}
 	
-				if( resp == null ){
+				if( instances == null ){
 					Message msg = new Message();
 					msg.arg1 = GETCITY_FAIL;
 					handler.sendMessage(msg);
 				} else {
 					Message msg = new Message();
 					msg.arg1 = GETCITY_SUCCESS;
-					msg.obj = resp;
+					msg.obj = new HandlerPayload(instancesJSON, instances);
 					handler.sendMessage(msg);
 				}
 			} catch (IOException e) {
@@ -149,19 +172,17 @@ public class CityGetterPreference extends DialogPreference{
 		}
 		
 	}
+
+
 	
 	static class GetCitiesHandler extends Handler {
 		
-		private ProgressBar pb;
-		private RadioGroup citylist;
-		private Context context;
+		private CityGetterPreference cgprefs;
 		
-		GetCitiesHandler(ProgressBar pb, RadioGroup citylist, Context context){
+		GetCitiesHandler(CityGetterPreference cgprefs){
 			super();
 
-			this.pb = pb;
-			this.citylist = citylist;
-			this.context = context;
+			this.cgprefs = cgprefs;
 			
 		}
 		
@@ -171,23 +192,25 @@ public class CityGetterPreference extends DialogPreference{
 	    	if( msg.arg1 == GetCitiesTask.GETCITY_FAIL ){
 
 	    	} else {
-	    		citylist.removeAllViews();
+	    		cgprefs.citylist.removeAllViews();
 	    		
-	    		@SuppressWarnings("unchecked")
-				List<CityInstance> cities = (List<CityInstance>) msg.obj;
+	    		HandlerPayload obj = (HandlerPayload)msg.obj;
+				List<CityInstance> cities = obj.instances;
 	    		for(int i=0; i<cities.size(); i++){
 	    			Log.v("DEBUG", "city: "+cities.get(i));
 	    			
-	    			RadioButton cityView = new RadioButton(context);
+	    			RadioButton cityView = new RadioButton(cgprefs.getContext());
 	    			cityView.setLayoutParams( new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT) );
 	    			cityView.setText(cities.get(i).city_name);
 	    			cityView.setTag(cities.get(i).prefix);
 	    			cityView.setPadding(5, 10, 10, 5);
-	    			citylist.addView(cityView);
+	    			cgprefs.citylist.addView(cityView);
 	    		}
+	    		
+	    		cgprefs.cities = cities;
 	    	}
 		    	
-	    	pb.setVisibility(View.INVISIBLE);
+	    	cgprefs.progressbar.setVisibility(View.INVISIBLE);
 			
 	    }
 	}
@@ -195,6 +218,7 @@ public class CityGetterPreference extends DialogPreference{
     private Button button;
 	private ProgressBar progressbar;
 	private RadioGroup citylist;
+	public List<CityInstance> cities;
 
 	public CityGetterPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -216,13 +240,14 @@ public class CityGetterPreference extends DialogPreference{
 		
 		this.progressbar.setVisibility(View.INVISIBLE);
         
+		final CityGetterPreference cgprefs = this;
 		this.button.setOnClickListener( new OnClickListener() {
 
 			@Override
 			public void onClick(View arg0) {
 				Log.v("DEBUG", "get more stuffage");
 				progressbar.setVisibility(View.VISIBLE);
-				new GetCitiesTask(new GetCitiesHandler(progressbar,citylist,getContext())).execute();
+				new GetCitiesTask(new GetCitiesHandler(cgprefs)).execute();
 			}
 
 		});
