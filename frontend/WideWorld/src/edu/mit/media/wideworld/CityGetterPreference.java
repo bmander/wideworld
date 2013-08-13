@@ -1,7 +1,11 @@
 package edu.mit.media.wideworld;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -144,9 +148,14 @@ public class CityGetterPreference extends DialogPreference{
 		protected Void doInBackground(Void... params) {
 			try {
 				String instancesJSON = this.getInstancesJSON();
+				
 				List<CityInstance> instances;
 				try {
-					instances = this.getInstances(instancesJSON);
+					if(instancesJSON!=null){
+						instances = this.getInstances(instancesJSON);
+					} else {
+						instances = null;
+					}
 				} catch (JSONException e) {
 					instances = null;
 				}
@@ -208,6 +217,20 @@ public class CityGetterPreference extends DialogPreference{
 	    		}
 	    		
 	    		cgprefs.cities = cities;
+	    		
+				try {
+		    		FileOutputStream fos;
+					fos = cgprefs.getContext().openFileOutput("instances.json", Context.MODE_PRIVATE);
+		    		fos.write(obj.instancesJSON.getBytes());
+		    		fos.close();
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
 	    	}
 		    	
 	    	cgprefs.progressbar.setVisibility(View.INVISIBLE);
@@ -228,6 +251,26 @@ public class CityGetterPreference extends DialogPreference{
         setNegativeButtonText(android.R.string.cancel);
         
         setDialogIcon(null);
+        
+        try {
+			FileInputStream instancesFile = context.openFileInput("instances.json");
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			while(true){
+				int bb = instancesFile.read();
+				if(bb==-1){
+					break;
+				}
+				bos.write(bb);
+			}
+			String instancesJSON = bos.toString();
+			Log.v("DEBUG", "already have one of these");
+			Log.v("DEBUG", instancesJSON );
+		} catch (FileNotFoundException e) {
+			// normal occurrence when instances.json has not been written before
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         
     }
 	
