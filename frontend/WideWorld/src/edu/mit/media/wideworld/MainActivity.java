@@ -226,6 +226,10 @@ public class MainActivity extends FragmentActivity
     {
         super.onCreate(savedInstanceState);
         
+        /* start setup activity, if wideworld has not yet been set up*/
+        Intent intent = new Intent(this, SetupActivity.class);
+        startActivity(intent);
+        
         cityChangeListener = new CityPreferenceChangeListener();
     	PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(cityChangeListener);
 

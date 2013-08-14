@@ -30,18 +30,6 @@ import android.widget.RadioGroup;
 
 public class CityGetterPreference extends DialogPreference{
 	
-	class HandlerPayload{
-		String instancesJSON;
-		List<CityInstance> instances;
-		
-		public HandlerPayload(String instancesJSON,
-				List<CityInstance> instances) {
-			this.instancesJSON = instancesJSON;
-			this.instances = instances;
-		}
-
-	}
-	
 	class GetCitiesTask extends AsyncTask<Void,Void,Void> {
 		
 		private static final int GETCITY_SUCCESS = 0;
