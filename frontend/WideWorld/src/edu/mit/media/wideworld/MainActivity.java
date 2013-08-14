@@ -43,9 +43,7 @@ public class MainActivity extends FragmentActivity
 				String tag) {
 			
 			if( tag.equals("citygetter") ){
-				Log.v("DEBUG", "city changed");
 				String newPrefix = prefs.getString("citygetter", null);
-				Log.v("DEBUG", "changed to "+newPrefix);
 				
 				cities = CitiesFile.getInstances(MainActivity.this);
 				if( newPrefix!=null && cities!=null ){
