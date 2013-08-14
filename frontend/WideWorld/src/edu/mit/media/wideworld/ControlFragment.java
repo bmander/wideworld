@@ -608,6 +608,7 @@ public class ControlFragment extends Fragment {
 				continue;
 			}
 			
+			
 			narrativeContainer.addView(legDiv);
 		}
 	}

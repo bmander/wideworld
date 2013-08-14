@@ -74,17 +74,22 @@ public class MainActivity extends FragmentActivity
 					// starts again next it starts up at the new city
 					
 					SharedPreferences mapPrefs = MainActivity.this.getSharedPreferences(OpenStreetMapConstants.PREFS_NAME, Context.MODE_PRIVATE);
-//					final SharedPreferences.Editor edit = mapPrefs.edit();
-//			        edit.putInt(OpenStreetMapConstantsPREFS_SCROLL_X, mMapView.getScrollX());
-//			        edit.putInt(PREFS_SCROLL_Y, mMapView.getScrollY());
-//			        edit.putInt(PREFS_ZOOM_LEVEL, mMapView.getZoomLevel());
+					final SharedPreferences.Editor edit = mapPrefs.edit();
+					edit.putInt(OpenStreetMapConstants.PREFS_CENTER_LAT, (int) (city.center[0]*1E6));
+					edit.putInt(OpenStreetMapConstants.PREFS_CENTER_LON, (int) (city.center[1]*1E6));
+					edit.putInt(OpenStreetMapConstants.PREFS_ZOOM_LEVEL, city.default_zoom);
+					edit.commit();
 				} else {
 					Log.v("DEBUG", "map fragment does exist");
 					// if it does, modify its state
+					
 					// set tile source
+					mapFragment.setTileSource( city.tile_server );
 					// set center
+					mapFragment.setCenter( city.center[0], city.center[1] );
 					// set bounds
 					// set zoomlevel
+					mapFragment.setZoom( city.default_zoom );
 				}
 				
 
@@ -224,7 +229,6 @@ public class MainActivity extends FragmentActivity
         cityChangeListener = new CityPreferenceChangeListener();
     	PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(cityChangeListener);
 
-     
         /* get the current city */
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         String cityPrefix = sharedPref.getString("citygetter", null);
@@ -237,6 +241,24 @@ public class MainActivity extends FragmentActivity
         			break;
         		}
         	}
+        }
+        
+        Log.v("DEBUG", "current city:"+city);
+        
+        /* if we were able to get the current city, set the state of the map */
+        if(city!=null){
+			SharedPreferences mapPrefs = MainActivity.this.getSharedPreferences(OpenStreetMapConstants.PREFS_NAME, Context.MODE_PRIVATE);
+			
+			
+			if(!mapPrefs.contains(OpenStreetMapConstants.PREFS_CENTER_LAT) ||
+			   !mapPrefs.contains(OpenStreetMapConstants.PREFS_CENTER_LON) ||
+			   !mapPrefs.contains(OpenStreetMapConstants.PREFS_ZOOM_LEVEL)) {
+				final SharedPreferences.Editor edit = mapPrefs.edit();
+				edit.putInt(OpenStreetMapConstants.PREFS_CENTER_LAT, (int) (city.center[0]*1E6));
+				edit.putInt(OpenStreetMapConstants.PREFS_CENTER_LON, (int) (city.center[1]*1E6));
+				edit.putInt(OpenStreetMapConstants.PREFS_ZOOM_LEVEL, city.default_zoom);
+				edit.commit();
+			}
         }
         
         orig = new TerminusManager(this, TerminusManager.ORIG);

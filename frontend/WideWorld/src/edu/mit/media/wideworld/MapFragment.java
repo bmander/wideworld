@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.osmdroid.ResourceProxy;
+import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.tileprovider.tilesource.XYTileSource;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
@@ -82,9 +83,7 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         }
         
         if(top.city!=null){
-	        XYTileSource ww_tiles = new XYTileSource("WWTiles", null, 10, 18, 256, ".png",
-	                                top.city.tile_server);
-	        mMapView.setTileSource( ww_tiles );
+        	this.setTileSource(top.city.tile_server);
         }
         
         mMapView.setUseSafeCanvas(true);
@@ -140,8 +139,14 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 		
 		Log.v("DEBUG", locOverlay.toString() );
 
-        mMapView.getController().setZoom(mPrefs.getInt(PREFS_ZOOM_LEVEL, 1));
-        mMapView.scrollTo(mPrefs.getInt(PREFS_SCROLL_X, 0), mPrefs.getInt(PREFS_SCROLL_Y, 0));
+		int zoom = mPrefs.getInt(PREFS_ZOOM_LEVEL, 1);
+        mMapView.getController().setZoom(zoom);
+        int lat = mPrefs.getInt(PREFS_CENTER_LAT, 0);
+        int lon = mPrefs.getInt(PREFS_CENTER_LON, 0);
+        GeoPoint center = new GeoPoint(lat,lon);
+        mMapView.getController().setCenter(center);
+        
+        Log.v("DEBUG", "set map zoom:"+zoom+" lat:"+lat+" lon:"+lon);
 
         setHasOptionsMenu(true);
     }
@@ -151,8 +156,9 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
     {
         final SharedPreferences.Editor edit = mPrefs.edit();
         //edit.putString(PREFS_TILE_SOURCE, mMapView.getTileProvider().getTileSource().name());
-        edit.putInt(PREFS_SCROLL_X, mMapView.getScrollX());
-        edit.putInt(PREFS_SCROLL_Y, mMapView.getScrollY());
+        IGeoPoint center = mMapView.getMapCenter();
+        edit.putInt(PREFS_CENTER_LAT, center.getLatitudeE6());
+        edit.putInt(PREFS_CENTER_LON, center.getLongitudeE6());
         edit.putInt(PREFS_ZOOM_LEVEL, mMapView.getZoomLevel());
         edit.commit();
         
@@ -339,6 +345,20 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 		
         mMapView.invalidate();
 		
+	}
+
+	public void setTileSource(String tile_server) {
+        XYTileSource ww_tiles = new XYTileSource("WWTiles", null, 10, 18, 256, ".png",
+                tile_server);
+        mMapView.setTileSource( ww_tiles );
+	}
+
+	public void setCenter(double lat, double lon) {
+		mMapView.getController().setCenter(new GeoPoint(lat,lon));
+	}
+
+	public void setZoom(int zoom) {
+		mMapView.getController().setZoom(zoom);
 	}
 
 }
