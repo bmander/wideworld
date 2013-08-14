@@ -75,9 +75,17 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         mResourceProxy = new ResourceProxyImpl(inflater.getContext().getApplicationContext());
         mMapView = new MapView(inflater.getContext(), 256, mResourceProxy);
         
-        XYTileSource ww_tiles = new XYTileSource("WWTiles", null, 10, 18, 256, ".png",
-                                "http://wideworld.media.mit.edu:8888/v2/boston/");
-        mMapView.setTileSource( ww_tiles );
+        // if we have no city configuration, the map is useless
+        // the whole app is just barely limping along.
+        if(top.city==null){
+        	mMapView.setVisibility(View.GONE);
+        }
+        
+        if(top.city!=null){
+	        XYTileSource ww_tiles = new XYTileSource("WWTiles", null, 10, 18, 256, ".png",
+	                                top.city.tile_server);
+	        mMapView.setTileSource( ww_tiles );
+        }
         
         mMapView.setUseSafeCanvas(true);
         setHardwareAccelerationOff();
@@ -278,7 +286,6 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
         	
             return false;
         }
-        
         
 	}
 

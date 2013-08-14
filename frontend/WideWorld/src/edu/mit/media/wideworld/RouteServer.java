@@ -19,7 +19,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import org.osmdroid.util.GeoPoint;
 
 import android.os.AsyncTask;
 import android.util.Log;
@@ -270,16 +269,12 @@ public class RouteServer {
 				        throw new IOException(statusLine.getReasonPhrase());
 				    }
 				} catch (ClientProtocolException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (URISyntaxException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (JSONException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				

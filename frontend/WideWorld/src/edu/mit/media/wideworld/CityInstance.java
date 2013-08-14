@@ -21,6 +21,8 @@ public class CityInstance implements Parcelable{
 	String city_name;
 	String prefix;
 	
+	String tile_server;
+	
 	@Override
 	public int describeContents() {
 		return 0;
@@ -36,6 +38,7 @@ public class CityInstance implements Parcelable{
 		dest.writeString(transit_name);
 		dest.writeString(city_name);
 		dest.writeString(prefix);
+		dest.writeString(tile_server);
 	}
 	
     public static final Parcelable.Creator<CityInstance> CREATOR
@@ -59,6 +62,7 @@ public class CityInstance implements Parcelable{
         transit_name = in.readString();
         city_name = in.readString();
         prefix = in.readString();
+        tile_server = in.readString();
     }
 	public CityInstance() {
 	}
@@ -82,6 +86,8 @@ public class CityInstance implements Parcelable{
 		ret.transit_name = jsonObj.getString("TRANSIT_NAME");
 		ret.city_name = jsonObj.getString("CITY_NAME");
 		ret.prefix = jsonObj.getString("PREFIX");
+		ret.tile_server = jsonObj.getString("TILE_SERVER");
+		
 		
 		return ret;
 		

@@ -17,6 +17,7 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.location.Address;
 import android.location.Location;
 import android.location.LocationManager;
@@ -35,6 +36,42 @@ import android.widget.Toast;
 @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
 public class MainActivity extends FragmentActivity
 {
+	class CityPreferenceChangeListener implements OnSharedPreferenceChangeListener {
+
+		@Override
+		public void onSharedPreferenceChanged(SharedPreferences prefs,
+				String tag) {
+			
+			if( tag.equals("citygetter") ){
+				Log.v("DEBUG", "city changed");
+				String newPrefix = prefs.getString("citygetter", null);
+				Log.v("DEBUG", "changed to "+newPrefix);
+				
+				cities = CitiesFile.getInstances(MainActivity.this);
+				if( newPrefix!=null && cities!=null ){
+					for(int i=0; i<cities.size(); i++){
+						CityInstance city = cities.get(i);
+						if( city.prefix.equals( newPrefix ) ){
+							MainActivity.this.city = city;
+							break;
+						}
+					}
+				} else {
+					return;
+				}
+				
+				Log.v("DEBUG", "new city is "+MainActivity.this.city);
+				
+				//change routeServer
+				
+				//change map
+			}
+			Log.v("DEBUG", tag+" changed");
+			
+		}
+		
+	}
+	
 	class TerminusManager{
 		static final int GPS = 1;
 		static final int ADDRESS = 2;
@@ -145,6 +182,7 @@ public class MainActivity extends FragmentActivity
 	TerminusManager dest;
 	
 	LocationManager locationManager;
+	CityPreferenceChangeListener cityChangeListener;
 
 	private double bike_speed;
 	
@@ -157,6 +195,10 @@ public class MainActivity extends FragmentActivity
     public void onCreate(final Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        
+        cityChangeListener = new CityPreferenceChangeListener();
+    	PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(cityChangeListener);
+
      
         /* get the current city */
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
@@ -207,7 +249,11 @@ public class MainActivity extends FragmentActivity
         
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         
-        routeServer = new RouteServer("wideworld.media.mit.edu", "bos");
+        if( city!=null ){
+        	routeServer = new RouteServer("wideworld.media.mit.edu", city.prefix);
+        } else {
+        	routeServer = null;
+        }
                 
         ActionBar actionBar = this.getActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
@@ -301,6 +347,13 @@ public class MainActivity extends FragmentActivity
     }
     
     @Override
+    protected void onResume() {
+    	
+    	
+    	super.onResume();
+    }
+    
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu items for use in the action bar
         MenuInflater inflater = getMenuInflater();
@@ -355,6 +408,8 @@ public class MainActivity extends FragmentActivity
     @Override
     public void onPause(){
     	super.onPause();
+    	
+
     	Log.v("DEBUG", "pausing activity");
     }
     
@@ -367,13 +422,14 @@ public class MainActivity extends FragmentActivity
     @Override
     public void onDestroy(){
     	super.onDestroy();
+    	PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(cityChangeListener);
+
     	Log.v("DEBUG", "destroying activity");
     }
     
 	public void onCheckboxClicked(View view) {
 	    // Is the view now checked?
 	    this.useTransit = ((CheckBox) view).isChecked();
-	    	    
 	}
 	
 	public void onBikeshareCheckboxClicked(View view){
@@ -384,6 +440,11 @@ public class MainActivity extends FragmentActivity
 	protected void findAndDisplayRoute() {		
 		
 		if( this.getOrigin()==null || this.getDestination()==null ){
+			return;
+		}
+		
+		// the routeserver can be null if the server was not configured or is misconfigured
+		if( this.routeServer==null ){
 			return;
 		}
 		
