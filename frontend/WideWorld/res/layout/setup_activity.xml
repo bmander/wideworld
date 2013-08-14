@@ -1,12 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content" >
-    
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
     <TextView
+        android:id="@+id/pitch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="setup" >
-    </TextView>
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:text="Interested in helping MIT?" />
 
-</LinearLayout>
+    <Button
+        android:id="@+id/yesbutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/pitch"
+        android:text="yep" />
+
+    <Button
+        android:id="@+id/nobutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/yesbutton"
+        android:layout_alignBottom="@+id/yesbutton"
+        android:layout_toRightOf="@+id/yesbutton"
+        android:text="nope" />
+
+</RelativeLayout>

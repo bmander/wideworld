@@ -34,8 +34,8 @@
             android:label="@string/app_name">
         </activity>
         <activity
-            android:name="edu.mit.media.wideworld.SetupActivity">
-        </activity>
+            android:name="edu.mit.media.wideworld.SetupActivity"
+            android:theme="@style/dialog_light"/>
                 
     </application>
     
