@@ -140,13 +140,13 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
 		Log.v("DEBUG", locOverlay.toString() );
 
 		int zoom = mPrefs.getInt(PREFS_ZOOM_LEVEL, 1);
-        mMapView.getController().setZoom(zoom);
         int lat = mPrefs.getInt(PREFS_CENTER_LAT, 0);
         int lon = mPrefs.getInt(PREFS_CENTER_LON, 0);
-        GeoPoint center = new GeoPoint(lat,lon);
-        mMapView.getController().setCenter(center);
         
-        Log.v("DEBUG", "set map zoom:"+zoom+" lat:"+lat+" lon:"+lon);
+        this.setZoom(zoom);
+        this.setCenter(lat/1.0e6, lon/1.0e6);
+        
+        Log.v("DEBUG", "set map on create:"+zoom+" lat:"+lat/1.0e6+" lon:"+lon/1.0e6);
 
         setHasOptionsMenu(true);
     }
@@ -156,6 +156,8 @@ public class MapFragment extends Fragment implements OpenStreetMapConstants
     {
         final SharedPreferences.Editor edit = mPrefs.edit();
         //edit.putString(PREFS_TILE_SOURCE, mMapView.getTileProvider().getTileSource().name());
+        
+        Log.v("DEBUG", "save map state");
         IGeoPoint center = mMapView.getMapCenter();
         edit.putInt(PREFS_CENTER_LAT, center.getLatitudeE6());
         edit.putInt(PREFS_CENTER_LON, center.getLongitudeE6());

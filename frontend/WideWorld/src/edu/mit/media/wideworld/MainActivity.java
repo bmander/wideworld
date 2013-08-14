@@ -69,17 +69,14 @@ public class MainActivity extends FragmentActivity
 				//change map
 				MapFragment mapFragment = (MapFragment) MainActivity.this.getFragmentManager().findFragmentByTag("map");
 				
-				if( mapFragment == null ){
-					// if map tab doesn't exist, blow away its persisted state so that when it 
-					// starts again next it starts up at the new city
-					
-					SharedPreferences mapPrefs = MainActivity.this.getSharedPreferences(OpenStreetMapConstants.PREFS_NAME, Context.MODE_PRIVATE);
-					final SharedPreferences.Editor edit = mapPrefs.edit();
-					edit.putInt(OpenStreetMapConstants.PREFS_CENTER_LAT, (int) (city.center[0]*1E6));
-					edit.putInt(OpenStreetMapConstants.PREFS_CENTER_LON, (int) (city.center[1]*1E6));
-					edit.putInt(OpenStreetMapConstants.PREFS_ZOOM_LEVEL, city.default_zoom);
-					edit.commit();
-				} else {
+				SharedPreferences mapPrefs = MainActivity.this.getSharedPreferences(OpenStreetMapConstants.PREFS_NAME, Context.MODE_PRIVATE);
+				final SharedPreferences.Editor edit = mapPrefs.edit();
+				edit.putInt(OpenStreetMapConstants.PREFS_CENTER_LAT, (int) (city.center[0]*1E6));
+				edit.putInt(OpenStreetMapConstants.PREFS_CENTER_LON, (int) (city.center[1]*1E6));
+				edit.putInt(OpenStreetMapConstants.PREFS_ZOOM_LEVEL, city.default_zoom);
+				edit.commit();
+				
+				if( mapFragment != null ){
 					Log.v("DEBUG", "map fragment does exist");
 					// if it does, modify its state
 					
@@ -90,6 +87,9 @@ public class MainActivity extends FragmentActivity
 					// set bounds
 					// set zoomlevel
 					mapFragment.setZoom( city.default_zoom );
+					
+			        Log.v("DEBUG", "set map on pref change:"+city.default_zoom+" lat:"+city.center[0]+" lon:"+city.center[1]);
+
 				}
 				
 
