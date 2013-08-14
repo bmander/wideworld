@@ -5,6 +5,7 @@ import java.util.List;
 import org.osmdroid.util.GeoPoint;
 
 import edu.mit.media.wideworld.RouteServer.Response;
+import edu.mit.media.wideworld.constants.OpenStreetMapConstants;
 
 import android.annotation.TargetApi;
 import android.app.ActionBar;
@@ -61,8 +62,34 @@ public class MainActivity extends FragmentActivity
 				Log.v("DEBUG", "new city is "+MainActivity.this.city);
 				
 				//change routeServer
+				if( MainActivity.this.routeServer!=null ){
+					MainActivity.this.routeServer.url = MainActivity.this.city.route_server;
+				}
 				
 				//change map
+				MapFragment mapFragment = (MapFragment) MainActivity.this.getFragmentManager().findFragmentByTag("map");
+				
+				if( mapFragment == null ){
+					// if map tab doesn't exist, blow away its persisted state so that when it 
+					// starts again next it starts up at the new city
+					
+					SharedPreferences mapPrefs = MainActivity.this.getSharedPreferences(OpenStreetMapConstants.PREFS_NAME, Context.MODE_PRIVATE);
+//					final SharedPreferences.Editor edit = mapPrefs.edit();
+//			        edit.putInt(OpenStreetMapConstantsPREFS_SCROLL_X, mMapView.getScrollX());
+//			        edit.putInt(PREFS_SCROLL_Y, mMapView.getScrollY());
+//			        edit.putInt(PREFS_ZOOM_LEVEL, mMapView.getZoomLevel());
+				} else {
+					Log.v("DEBUG", "map fragment does exist");
+					// if it does, modify its state
+					// set tile source
+					// set center
+					// set bounds
+					// set zoomlevel
+				}
+				
+
+				
+
 			}
 			Log.v("DEBUG", tag+" changed");
 			
@@ -248,7 +275,7 @@ public class MainActivity extends FragmentActivity
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         
         if( city!=null ){
-        	routeServer = new RouteServer("wideworld.media.mit.edu", city.prefix);
+        	routeServer = new RouteServer(city.route_server);
         } else {
         	routeServer = null;
         }
