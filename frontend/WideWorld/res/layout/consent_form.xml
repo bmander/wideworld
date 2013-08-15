@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:padding="10dp" >
+
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+	    <TextView
+	        android:id="@+id/copy"
+	        android:textSize="16dp"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_alignParentLeft="true"
+	        android:layout_alignParentTop="true"
+	        android:text="You are invited to participate in a study of urban travel behavior. The study involves using this app to plan routes. If you participate in the study, WideWorld will record the trip requests that you make using this app. If you do not consent to participate in the study, the WideWorld app will work normally. Neither your name nor any other personally identifying information will be stored with or otherwise associated with your trip requests. Furthermore, the WideWorld study does not involve the collection of location data from your phone." />
+	
+	    <CheckBox
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="I consent to participate" />
+
+	    </LinearLayout>
+    </ScrollView>
+
+    <Button
+        android:id="@+id/yesbutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/radiogroup"
+        android:layout_alignParentBottom="true"
+        android:text="Done" />
+
+</RelativeLayout>

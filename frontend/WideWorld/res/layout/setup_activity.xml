@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="fill_parent"
+    android:padding="10dp" >
 
     <TextView
         android:id="@+id/pitch"
+        android:textSize="16dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:text="Interested in helping MIT?" />
+        android:text="WideWorld is a project of the Changing Places Group at the MIT Media Lab to learn about commuting patterns by tracking trip planner usage. \n\nAre you interested in learning more about how you can help the WideWorld project?" />
 
     <Button
         android:id="@+id/yesbutton"
@@ -17,7 +19,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/pitch"
-        android:text="yep" />
+        android:text="Learn more" />
 
     <Button
         android:id="@+id/nobutton"
@@ -26,6 +28,6 @@
         android:layout_alignBaseline="@+id/yesbutton"
         android:layout_alignBottom="@+id/yesbutton"
         android:layout_toRightOf="@+id/yesbutton"
-        android:text="nope" />
+        android:text="No thanks" />
 
 </RelativeLayout>
