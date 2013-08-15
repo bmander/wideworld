@@ -79,7 +79,7 @@
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentTop="true"
                 android:layout_weight="0.63"
-                android:text="Neither your name nor any other personally identifying information will be stored with or otherwise associated with your trip requests. Furthermore, Any information that is obtained in connection with this study and that can be identified with you will remain confidential and will be disclosed only with your permission or as required by law."
+                android:text="Neither your name nor any other personally identifying information will be stored with or otherwise associated with your trip requests. Furthermore, any information that is obtained in connection with this study and that can be identified with you will remain confidential and will be disclosed only with your permission or as required by law."
                 android:textSize="14dp" />
             
             <TextView
@@ -97,6 +97,23 @@
                 android:layout_alignParentTop="true"
                 android:layout_weight="0.63"
                 android:text="If you have any questions or concerns about this study, please contact Brandon Martin-Anderson by email at bmander@mit.edu."
+                android:textSize="14dp" />
+            
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:textSize="14dp" 
+                android:text="CONSENT OF PARTICIPANT" />
+            
+            <TextView
+                android:id="@+id/copy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_weight="0.63"
+                android:text="My checking the box you indicate that you understand the procedures described above and you consent to participate in this study."
                 android:textSize="14dp" />
 
             <CheckBox

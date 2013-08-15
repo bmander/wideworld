@@ -5,19 +5,27 @@
     android:padding="10dp" >
 
     <TextView
-        android:id="@+id/pitch"
-        android:textSize="16dp"
+        android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:text="Hello, WideWorld user!\n\nAre you interested in helping MIT learn more about urban travel behavior? Click below to see how you can participate simply by using this app." />
+        android:text="INVITATION TO PARTICIPATE IN RESEARCH"
+        android:textSize="16dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/pitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textView1"
+        android:layout_below="@+id/textView1"
+        android:text="Are you interested in helping MIT learn more about urban travel behavior? Click below to see how you can participate simply by using this app."
+        android:textSize="16dp" />
 
     <Button
         android:id="@+id/yesbutton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
+        android:layout_alignLeft="@+id/textView1"
         android:layout_below="@+id/pitch"
         android:text="Learn more" />
 

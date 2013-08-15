@@ -2,8 +2,6 @@ package edu.mit.media.wideworld;
 
 import java.util.List;
 
-import edu.mit.media.wideworld.CityGetterPreference.GetCitiesHandler;
-
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.os.Build;
@@ -19,6 +17,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
+import android.widget.TextView;
 
 public class SetupActivity extends Activity {
 	
@@ -34,10 +33,12 @@ public class SetupActivity extends Activity {
 		}
 		
 		@Override
-	    public void handleMessage(Message msg) {	    	
-	    	
+	    public void handleMessage(Message msg) {
+				    	
 	    	if( msg.arg1 == GetCitiesTask.GETCITY_FAIL ){
-	    		// in the case of failure, enable a 'retry' button
+	    		// city list fetch failed for some reason. most likely timed out because the phone isn't
+	    		// connected to the internet
+	    		ctx.showRetry();
 	    	} else {	    		
 
 	    		String citiesJSON = (String)msg.obj;
@@ -45,9 +46,14 @@ public class SetupActivity extends Activity {
 	    		
 	    		if( cities!=null ){
 	    			ctx.showCitiesList(cities);
+	    			CitiesFile.saveInstancesJSON(ctx, citiesJSON);
+	    		} else {
+	    			// if the msg came back with a success type but the citiesJSON didn't parse
+	    			// into a valid 'cities' list, most likely the server sent back something cruddy
+	    			// in this case it doesn't make much sense to ask the user to hit 'retry' but if the
+	    			// server isn't giving city instance information they're out of luck in any case
+	    			ctx.showRetry();
 	    		}
-	    			
-	    		CitiesFile.saveInstancesJSON(ctx, citiesJSON);
 				
 	    	}
 		    	
@@ -64,6 +70,10 @@ public class SetupActivity extends Activity {
 	
 	LinearLayout cityList;
 	ProgressBar progress;
+	Button doneButton;
+	TextView cityPickerErrorMessage;
+	
+	String prefix=null;
 	
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
@@ -97,27 +107,46 @@ public class SetupActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				setContentView(cityPicker);
-				
-				// todo move this to start when setup starts
-				new GetCitiesTask(new GetCitiesHandler(SetupActivity.this)).execute();
 			}	
+		});
+		
+		View pickerContent = cityPicker.findViewById(R.id.citypickercontent);
+		pickerContent.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View arg0) {
+				startGetCitiesTask();
+			}
+			
 		});
 		
 		cityList = (LinearLayout) cityPicker.findViewById(R.id.citylist);
 		progress = (ProgressBar) cityPicker.findViewById(R.id.progressbar);
+		doneButton = (Button) cityPicker.findViewById(R.id.donebutton);
+		cityPickerErrorMessage = (TextView) cityPicker.findViewById(R.id.citypickererrormessage);
 		
 		setContentView( pitch );
 		
-		
+		startGetCitiesTask();
 
 		setFinishOnTouchOutside(false);
 		
     }
 
 
-	public void showCitiesList(List<CityInstance> cities) {
-		Log.v("DEBUG", "write list of "+cities.size()+" cities");
-		
+	private void startGetCitiesTask() {
+		cityPickerErrorMessage.setVisibility(View.GONE);
+		progress.setVisibility(View.VISIBLE);
+		new GetCitiesTask(new GetCitiesHandler(SetupActivity.this)).execute();		
+	}
+
+
+	public void showRetry() {
+		cityPickerErrorMessage.setVisibility(View.VISIBLE);
+	}
+
+
+	public void showCitiesList(List<CityInstance> cities) {		
 		cityList.removeAllViews();
 		
 		for(int i=0; i<cities.size(); i++){
@@ -130,21 +159,16 @@ public class SetupActivity extends Activity {
 
 				@Override
 				public void onClick(View v) {
-					String prefix = (String)v.getTag();
+					prefix = (String)v.getTag();
 					
-					// set preference
-					Log.v("DEBUG", "preferred city is "+prefix);
+					doneButton.setEnabled(true);
 				}
 				
 			});
 			cityList.addView(cityView);
 			
-//			if(cities.get(i).prefix.equals(clickedPrefix)){
-//				citylist.check(cityView.getId());
-//			}
 		}
 		
-//		this.cities = cities;
 	}
     
 }
