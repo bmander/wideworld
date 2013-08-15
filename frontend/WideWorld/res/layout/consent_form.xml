@@ -20,7 +20,7 @@
 	        android:layout_height="wrap_content"
 	        android:layout_alignParentLeft="true"
 	        android:layout_alignParentTop="true"
-	        android:text="You are invited to participate in a study of urban travel behavior. The study involves using this app to plan routes. If you participate in the study, WideWorld will record the trip requests that you make using this app. If you do not consent to participate in the study, the WideWorld app will work normally. Neither your name nor any other personally identifying information will be stored with or otherwise associated with your trip requests. Furthermore, the WideWorld study does not involve the collection of location data from your phone." />
+	        android:text="You are invited to participate in a study of urban travel behavior. The study involves using this app to plan routes. If you participate in the study, WideWorld will record the trip requests that you make using this app. If you do not consent to participate in the study, the WideWorld app will work normally. Neither your name nor any other personally identifying information will be stored with or otherwise associated with your trip requests. Furthermore, the WideWorld study does not involve the collection of location data from your phone. Whether you chose to participate or not, you can change your choice at any time from the settings menu." />
 	
 	    <CheckBox
 	        android:layout_width="wrap_content"
