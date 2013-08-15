@@ -6,28 +6,105 @@
 
     <ScrollView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/yesbutton" >
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="366dp"
             android:orientation="vertical" >
 
-	    <TextView
-	        android:id="@+id/copy"
-	        android:textSize="16dp"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_alignParentLeft="true"
-	        android:layout_alignParentTop="true"
-	        android:text="You are invited to participate in a study of urban travel behavior. The study involves using this app to plan routes. If you participate in the study, WideWorld will record the trip requests that you make using this app. If you do not consent to participate in the study, the WideWorld app will work normally. Neither your name nor any other personally identifying information will be stored with or otherwise associated with your trip requests. Furthermore, the WideWorld study does not involve the collection of location data from your phone. Whether you chose to participate or not, you can change your choice at any time from the settings menu." />
-	
-	    <CheckBox
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:text="I consent to participate" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:textSize="16dp" 
+                android:text="CONSENT TO PARTICIPATE IN NON-BIOMEDICAL RESEARCH" />
 
-	    </LinearLayout>
+            <TextView
+                android:id="@+id/copy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_weight="0.63"
+                android:text="You are invited to participate in a study of urban travel behavior conducted by Brandon Martin-Anderson from the Changing Places group at the MIT Media Lab."
+                android:textSize="14dp" />
+            
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:textSize="14dp" 
+                android:text="PURPOSE AND PROCEDURES" />
+            
+            <TextView
+                android:id="@+id/copy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_weight="0.63"
+                android:text="Participation in this study involves using this app to plan routes, with the hope of discovering which neighborhoods are most popular at different times of day, and the properties that contribute to that popularity. If you participate in the study, WideWorld will record the trip requests that you make using this app."
+                android:textSize="14dp" />
+            
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:textSize="14dp" 
+                android:text="PARTICIPATION AND WITHDRAWAL" />
+            
+            <TextView
+                android:id="@+id/copy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_weight="0.63"
+                android:text="If you do not consent to participate in the study, the WideWorld app will be fully functional. You can withdraw from this study at any time without penalty by changing the study participation setting in the settings menu."
+                android:textSize="14dp" />
+            
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:textSize="14dp" 
+                android:text="CONFIDENTIALITY" />
+            
+            <TextView
+                android:id="@+id/copy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_weight="0.63"
+                android:text="Neither your name nor any other personally identifying information will be stored with or otherwise associated with your trip requests. Furthermore, Any information that is obtained in connection with this study and that can be identified with you will remain confidential and will be disclosed only with your permission or as required by law."
+                android:textSize="14dp" />
+            
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:textSize="14dp" 
+                android:text="IDENTIFICATION OF INVESTIGATORS" />
+            
+            <TextView
+                android:id="@+id/copy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_weight="0.63"
+                android:text="If you have any questions or concerns about this study, please contact Brandon Martin-Anderson by email at bmander@mit.edu."
+                android:textSize="14dp" />
+
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="I consent to participate" />
+        </LinearLayout>
+
     </ScrollView>
 
     <Button

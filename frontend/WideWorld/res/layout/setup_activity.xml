@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:text="WideWorld is a project of the Changing Places Group at the MIT Media Lab to learn about commuting patterns by tracking trip planner usage. \n\nAre you interested in learning more about how you can help the WideWorld project?" />
+        android:text="Hello, WideWorld user!\n\nAre you interested in helping MIT learn more about urban travel behavior? Click below to see how you can participate simply by using this app." />
 
     <Button
         android:id="@+id/yesbutton"
