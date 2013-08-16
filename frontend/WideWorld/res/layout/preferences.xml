@@ -1,17 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <CheckBoxPreference
-        android:key="foo"
-        android:title="foo"
-        android:summary="foo pref"
-        android:defaultValue="true" />
-    <CheckBoxPreference
-        android:key="bar"
-        android:title="bar"
-        android:summary="bar pref"
-        android:defaultValue="false" />
+    <edu.mit.media.wideworld.ConsentPreference
+        android:key="consent"
+        android:title="Study participation status"
+        android:summary="Consent not given" />
     <edu.mit.media.wideworld.CityGetterPreference
         android:key="citygetter"
-        android:title="Select City"
-        android:summary="None Selected" />
+        android:title="Select city"
+        android:summary="None selected" />
 </PreferenceScreen>
