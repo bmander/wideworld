@@ -200,6 +200,7 @@ public class MainActivity extends FragmentActivity
 	static final double BIKE_SPEED_SLOW = 2.0; // meters/second
 	static final double BIKE_SPEED_AVERAGE = 3.1; // meters/second
 	static final double BIKE_SPEED_FAST = 4.5; // meters/second
+	private static final int SETUP_ACTIVITY = 0;
 	
 	List<CityInstance> cities = null;
 	CityInstance city = null;
@@ -228,7 +229,7 @@ public class MainActivity extends FragmentActivity
         
         /* start setup activity, if wideworld has not yet been set up*/
         Intent intent = new Intent(this, SetupActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent,SETUP_ACTIVITY);
         
         cityChangeListener = new CityPreferenceChangeListener();
     	PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(cityChangeListener);
@@ -476,6 +477,19 @@ public class MainActivity extends FragmentActivity
     	PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(cityChangeListener);
 
     	Log.v("DEBUG", "destroying activity");
+    }
+    
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == SETUP_ACTIVITY) {
+            if (resultCode == RESULT_OK) {
+                Log.v("DEBUG", "SETUP SUCCESSFUL");
+                Log.v("DEBUG", "prefix is "+data.getStringExtra("prefix"));
+                Log.v("DEBUG", "consent is "+data.getBooleanExtra("consent",false));
+            } else {
+            	Log.v("DEBUG", "BACKED OUT OF SETUP");
+            }
+        }
     }
     
 	public void onCheckboxClicked(View view) {

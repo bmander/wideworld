@@ -4,6 +4,7 @@ import java.util.List;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,6 +15,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
@@ -73,6 +75,8 @@ public class SetupActivity extends Activity {
 	Button doneButton;
 	TextView cityPickerErrorMessage;
 	
+	CheckBox consentCheckbox;
+	
 	String prefix=null;
 	
 
@@ -125,10 +129,16 @@ public class SetupActivity extends Activity {
 		doneButton = (Button) cityPicker.findViewById(R.id.donebutton);
 		cityPickerErrorMessage = (TextView) cityPicker.findViewById(R.id.citypickererrormessage);
 		
+		consentCheckbox = (CheckBox)consentForm.findViewById(R.id.consentcheckbox);
+		
 		doneButton.setOnClickListener(new OnClickListener(){
 
 			@Override
 			public void onClick(View v) {
+				Intent data = new Intent();
+				data.putExtra("prefix", prefix);
+				data.putExtra("consent", consentCheckbox.isChecked() );
+				setResult(RESULT_OK, data);
 				finish();
 			}
 			

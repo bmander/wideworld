@@ -117,6 +117,7 @@
                 android:textSize="14dp" />
 
             <CheckBox
+                android:id="@+id/consentcheckbox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="I consent to participate" />
