@@ -25,6 +25,8 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
+import android.provider.Settings.Secure;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -42,7 +44,10 @@ public class MainActivity extends FragmentActivity
 		@Override
 		public void onSharedPreferenceChanged(SharedPreferences prefs,
 				String tag) {
-			
+			if( tag.equals("consent") ){
+				MainActivity.this.consented = prefs.getBoolean("consent", false);
+				Log.v("DEBUG", "consent status changed to "+MainActivity.this.consented);
+			}
 			if( tag.equals("citygetter") ){
 				String newPrefix = prefs.getString("citygetter", null);
 				
@@ -212,6 +217,7 @@ public class MainActivity extends FragmentActivity
 	
 	boolean useTransit;
 	boolean useBikeshare;
+	boolean consented = false;
 	TerminusManager orig;
 	TerminusManager dest;
 	
@@ -233,6 +239,7 @@ public class MainActivity extends FragmentActivity
         super.onCreate(savedInstanceState);
         
         SharedPreferences appwidePreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        consented = appwidePreferences.getBoolean("consent", false);
         
         /* start setup activity, if wideworld has not yet been set up*/
         // are we restarting from a saved instance, and the setup state is in the saved instance?
@@ -571,7 +578,14 @@ public class MainActivity extends FragmentActivity
 		Log.v("DEBUG", "start get route...");
 		this.startGetRoute();
 		final Activity superthis = this;
-		this.routeServer.getRoute(this.routeServer.new Request(lat1, lng1, lat2, lng2, useTransit, useBikeshare, bike_speed), new RouteServer.FetchRouteCallback(){
+		
+		RouteServer.Request request = this.routeServer.new Request(lat1, lng1, lat2, lng2, useTransit, useBikeshare, bike_speed);
+		if(consented){
+			request.consented = consented;
+			request.deviceId = getDeviceId();
+		}
+		
+		this.routeServer.getRoute(request, new RouteServer.FetchRouteCallback(){
 			public void onResponse(RouteServer.Response resp){
 				routeResponse = resp;
 				finishGetRoute();
@@ -582,6 +596,10 @@ public class MainActivity extends FragmentActivity
 			}
 		});
 		
+	}
+
+	private String getDeviceId() {
+		return Secure.getString(this.getContentResolver(),Secure.ANDROID_ID); 
 	}
 
 	public GeoPoint getOrigin() {

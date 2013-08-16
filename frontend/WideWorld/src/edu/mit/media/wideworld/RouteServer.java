@@ -34,6 +34,8 @@ public class RouteServer {
 		public boolean useTransit;
 		public boolean useBikeshare;
 		public double bikeSpeed;
+		public boolean consented;
+		public String deviceId;
 		
 		Request(double lat12, double lng12, double lat22, double lng22, boolean useTransit, boolean useBikeshare, double bikeSpeed){
 			this.lat1=lat12;
@@ -43,6 +45,9 @@ public class RouteServer {
 			this.useTransit = useTransit;
 			this.useBikeshare = useBikeshare;
 			this.bikeSpeed = bikeSpeed;
+			
+			this.consented=false;
+			this.deviceId=null;
 		}
 		
 		Request(double lat12, double lng12, double lat22, double lng22){
@@ -296,6 +301,12 @@ public class RouteServer {
 			
 		}
 		String url = this.url + "?lat1="+request.lat1+"&lon1="+request.lng1+"&lat2="+request.lat2+"&lon2="+request.lng2+"&bspeed="+request.bikeSpeed+"&transit="+(request.useTransit?"t":"f")+"&bikeshare="+(request.useBikeshare?"t":"f");
+		if(request.consented){
+			url = url+"&consent=t";
+		}
+		if(request.deviceId!=null){
+			url = url+"&device="+request.deviceId;
+		}
 		Log.v("DEBUG", url);
 		FetchRouteTask rt = new FetchRouteTask();
 		rt.execute(url);
