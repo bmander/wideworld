@@ -201,6 +201,9 @@ public class MainActivity extends FragmentActivity
 	static final double BIKE_SPEED_AVERAGE = 3.1; // meters/second
 	static final double BIKE_SPEED_FAST = 4.5; // meters/second
 	private static final int SETUP_ACTIVITY = 0;
+	private static final int SETUP_STATE_PRE = 1;
+	private static final int SETUP_STATE_MID = 2;
+	private static final int SETUP_STATE_POST = 3;
 	
 	List<CityInstance> cities = null;
 	CityInstance city = null;
@@ -219,6 +222,8 @@ public class MainActivity extends FragmentActivity
 	
 	protected Response routeResponse;
 	
+	int setup_state = SETUP_STATE_PRE;
+	
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -227,12 +232,25 @@ public class MainActivity extends FragmentActivity
     {
         super.onCreate(savedInstanceState);
         
+        SharedPreferences appwidePreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        
         /* start setup activity, if wideworld has not yet been set up*/
-        Intent intent = new Intent(this, SetupActivity.class);
-        startActivityForResult(intent,SETUP_ACTIVITY);
+        // are we restarting from a saved instance, and the setup state is in the saved instance?
+        if( savedInstanceState!=null && savedInstanceState.containsKey("setup_state") ){
+        	setup_state = savedInstanceState.getInt("setup_state");
+        // no. is the saved instance state in the app-wide persisted preferences?
+        } else {
+        	setup_state = appwidePreferences.getInt("setup_state", SETUP_STATE_PRE);
+        }
+        
+        if( setup_state == SETUP_STATE_PRE ){
+        	setup_state = SETUP_STATE_MID;
+	        Intent intent = new Intent(this, SetupActivity.class);
+	        startActivityForResult(intent,SETUP_ACTIVITY);
+        }
         
         cityChangeListener = new CityPreferenceChangeListener();
-    	PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(cityChangeListener);
+    	appwidePreferences.registerOnSharedPreferenceChangeListener(cityChangeListener);
 
         /* get the current city */
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
@@ -304,7 +322,7 @@ public class MainActivity extends FragmentActivity
         if( city!=null ){
         	routeServer = new RouteServer(city.route_server);
         } else {
-        	routeServer = null;
+        	routeServer = new RouteServer();
         }
                 
         ActionBar actionBar = this.getActionBar();
@@ -434,6 +452,8 @@ public class MainActivity extends FragmentActivity
     public void onSaveInstanceState(Bundle outState){
     	super.onSaveInstanceState(outState);
     	
+    	Log.v("DEBUG", "saving instances state");
+    	
     	int tabState = this.getActionBar().getSelectedTab().getPosition()+1;
     	outState.putInt("tabState", tabState );
     	
@@ -455,6 +475,9 @@ public class MainActivity extends FragmentActivity
     	// but transit preference into state
     	outState.putBoolean("useTransit", useTransit);
     	outState.putBoolean("useBikeshare", useBikeshare);
+    	
+    	// put setup state into state
+    	outState.putInt("setup_state", setup_state);
     }
     
     @Override
@@ -483,11 +506,33 @@ public class MainActivity extends FragmentActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == SETUP_ACTIVITY) {
             if (resultCode == RESULT_OK) {
-                Log.v("DEBUG", "SETUP SUCCESSFUL");
-                Log.v("DEBUG", "prefix is "+data.getStringExtra("prefix"));
-                Log.v("DEBUG", "consent is "+data.getBooleanExtra("consent",false));
+            	Log.v("DEBUG", "SETUP SUCCESSFUL");
+            	
+            	// get result of setup activity
+                String prefix = data.getStringExtra("prefix");
+                boolean consent = data.getBooleanExtra("consent", false);
+                Log.v("DEBUG", "prefix is "+prefix);
+                Log.v("DEBUG", "consent is "+consent);
+            	
+                // persist the result of the setup activity, and set the app to post-setup behavior
+            	SharedPreferences appwidePreferences = PreferenceManager.getDefaultSharedPreferences(this);
+            	SharedPreferences.Editor edit = appwidePreferences.edit();
+            	
+            	setup_state = SETUP_STATE_POST;
+
+            	edit.putInt("setup_state", setup_state);
+                edit.putString("citygetter", prefix);
+                edit.putBoolean("consent", consent);
+                
+                edit.commit();
+                
+                // there's a listener on the sharedperference changes to change app behavior
+                // once the prefs change, so we don't need to do anything else.
             } else {
             	Log.v("DEBUG", "BACKED OUT OF SETUP");
+    	        Intent intent = new Intent(this, SetupActivity.class);
+    	        startActivityForResult(intent,SETUP_ACTIVITY);
+    	        
             }
         }
     }
@@ -532,7 +577,6 @@ public class MainActivity extends FragmentActivity
 				finishGetRoute();
 				Log.v("DEBUG", "finish get route.");
 				
-				//Toast toast = Toast.makeText(superthis, "total time: "+(routeResponse.lastLocTime-firstLocTime)/60+"m", Toast.LENGTH_SHORT);
 				Toast toast = Toast.makeText(superthis, "total time: "+routeResponse.duration()/60+"m", Toast.LENGTH_SHORT);
 				toast.show();
 			}

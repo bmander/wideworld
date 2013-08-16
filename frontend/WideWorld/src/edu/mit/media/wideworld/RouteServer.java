@@ -222,7 +222,17 @@ public class RouteServer {
 		this.url = url;
 	}
 	
+	RouteServer(){
+		// it's possible to set up a blank routeserver so that the main activity can get one ready
+		// before the setup procedure fills it out
+		this.url = null;
+	}
+	
 	void getRoute( Request request, final FetchRouteCallback callback ){
+		if(this.url==null){
+			return;
+		}
+		
 		class FetchRouteTask extends AsyncTask<String, Void, Response> {
 			
 			@Override
