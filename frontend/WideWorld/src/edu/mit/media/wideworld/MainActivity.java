@@ -591,8 +591,12 @@ public class MainActivity extends FragmentActivity
 				finishGetRoute();
 				Log.v("DEBUG", "finish get route.");
 				
-				Toast toast = Toast.makeText(superthis, "total time: "+routeResponse.duration()/60+"m", Toast.LENGTH_SHORT);
-				toast.show();
+				try{
+					Toast toast = Toast.makeText(superthis, "total time: "+routeResponse.duration()/60+"m", Toast.LENGTH_SHORT);
+					toast.show();
+				} catch( NullPointerException ex ){
+					// do nothing
+				}
 			}
 		});
 		
