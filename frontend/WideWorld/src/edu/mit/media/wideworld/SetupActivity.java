@@ -125,6 +125,15 @@ public class SetupActivity extends Activity {
 		doneButton = (Button) cityPicker.findViewById(R.id.donebutton);
 		cityPickerErrorMessage = (TextView) cityPicker.findViewById(R.id.citypickererrormessage);
 		
+		doneButton.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View v) {
+				finish();
+			}
+			
+		});
+		
 		setContentView( pitch );
 		
 		startGetCitiesTask();
