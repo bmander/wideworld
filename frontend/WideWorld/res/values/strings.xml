@@ -3,6 +3,7 @@
 
     <string name="app_name">WideWorld</string>
     <string name="action_settings">Settings</string>
+    <string name="about">About</string>
     <string name="orig_hint">Origin Address</string>
     <string name="dest_hint">Destination Address</string>
     <string name="checkbox_usetransit">Use Transit</string>

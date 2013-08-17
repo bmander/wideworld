@@ -4,4 +4,8 @@
           android:icon="@drawable/settings"
           android:title="@string/action_settings"
           android:showAsAction="ifRoom"/>
+    <item android:id="@+id/about"
+          android:icon="@drawable/about"
+          android:title="@string/about"
+          android:showAsAction="ifRoom"/>
 </menu>
