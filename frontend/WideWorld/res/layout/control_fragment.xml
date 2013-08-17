@@ -245,6 +245,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" 
         android:layout_gravity="center_vertical"
+        android:layout_marginLeft="5dp"
         android:textSize="16sp"
         android:text="Biking speed:" />
 
@@ -273,6 +274,7 @@
     android:id="@+id/narrative"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginLeft="5dp"
     android:text="@string/blank_directions_filler" >
     
 </TextView>
