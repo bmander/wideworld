@@ -444,6 +444,9 @@ public class MainActivity extends FragmentActivity
             case R.id.action_settings:
                 openSettings();
                 return true;
+            case R.id.about:
+            	openAbout();
+            	return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -452,6 +455,11 @@ public class MainActivity extends FragmentActivity
     private void openSettings() {
 		Log.v("DEBUG", "open settings now");
 		Intent intent = new Intent(this, SettingsActivity.class);
+		startActivity(intent);
+	}
+    
+    private void openAbout() {
+		Intent intent = new Intent(this, AboutActivity.class);
 		startActivity(intent);
 	}
 

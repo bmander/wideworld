@@ -36,6 +36,8 @@
         <activity
             android:name="edu.mit.media.wideworld.SetupActivity"
             android:theme="@style/dialog_light"/>
+        <activity
+            android:name="edu.mit.media.wideworld.AboutActivity"/>
                 
     </application>
     
