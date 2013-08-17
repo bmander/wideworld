@@ -32,12 +32,19 @@
         <activity
             android:name="edu.mit.media.wideworld.SettingsActivity"
             android:label="@string/app_name">
+            <meta-data
+            android:name="android.support.PARENT_ACTIVITY"
+            android:value="edu.mit.media.wideworld.MainActivity" />
         </activity>
         <activity
             android:name="edu.mit.media.wideworld.SetupActivity"
             android:theme="@style/dialog_light"/>
         <activity
-            android:name="edu.mit.media.wideworld.AboutActivity"/>
+            android:name="edu.mit.media.wideworld.AboutActivity">
+            <meta-data
+            android:name="android.support.PARENT_ACTIVITY"
+            android:value="edu.mit.media.wideworld.MainActivity" />
+        </activity>
                 
     </application>
     
