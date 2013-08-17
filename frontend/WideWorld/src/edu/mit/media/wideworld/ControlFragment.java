@@ -123,7 +123,13 @@ public class ControlFragment extends Fragment {
 				
 				String locString = arg0[0];
 				Log.v("DEBUG", "geocode this: "+locString);
-				List<Address> addresses = geocodeWithinArea(locString, MAX_GEOCODED_LOCATIONS, 42.184267, -71.249771, 42.449301, 70.888595);
+				
+				if( top.city==null ){
+					return null;
+				}
+				
+				double[] bbox = top.city.bbox;
+				List<Address> addresses = geocodeWithinArea(locString, MAX_GEOCODED_LOCATIONS, bbox[1], bbox[0], bbox[3], bbox[2]);
 			
 				List<String> resp = new ArrayList<String>();
 				for(int i=0; i<addresses.size(); i++){
